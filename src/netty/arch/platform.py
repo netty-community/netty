@@ -60,6 +60,10 @@ class Manufacturer(StrEnum):
     aruba = "HPE"
     fortinet = "Fortinet"
 
+    @classmethod
+    def to_list_str(cls):
+        return [v.value for v in cls]
+
 
 class PortChannelPrefix(StrEnum):
     cisco = "Po"

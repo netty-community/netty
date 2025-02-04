@@ -30,6 +30,10 @@ class DeviceRole(StrEnum):
     wan_router = "WAN Router"
     sdwan_hub = "SD-WAN Hub"
 
+    @classmethod
+    def to_list_str(cls) -> list[str]:
+        return [role.value for role in cls]
+
     @property
     def stp_root(self) -> tuple[bool, int]:
         if self == DeviceRole.core_switch:

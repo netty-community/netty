@@ -14,6 +14,8 @@ annotated-types==0.7.0
     # via pydantic
 click==8.1.8
     # via typer
+et-xmlfile==2.0.0
+    # via openpyxl
 jinja2==3.1.5
     # via netty
 markdown-it-py==3.0.0
@@ -22,6 +24,8 @@ markupsafe==3.0.2
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+openpyxl==3.1.5
+    # via netty
 pydantic==2.10.5
     # via netty
     # via pydantic-extra-types
