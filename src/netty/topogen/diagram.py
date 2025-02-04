@@ -99,7 +99,9 @@ class Link:
         if self.entryX != 0 or self.entryY != 0 or self.exitX != 0 or self.exitY != 0:
             style = (
                 "edgeStyle=none;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=6;"
-                f"entryX={self.entryX};entryY={self.entryY};entryDx=0;entryDy=0;endFill=0;endArrow=none;strokeColor={self.color}"
+                f"entryX={self.entryX};entryY={self.entryY};entryDx=0;entryDy=0;"
+                f"exitX={self.exitX};exitY={self.exitY};exitDx=0;exitDy=0;"
+                f"endFill=0;endArrow=none;strokeColor={self.color}"
             )
         else:
             style = (
