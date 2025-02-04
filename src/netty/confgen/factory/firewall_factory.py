@@ -50,7 +50,7 @@ class Firewall:
 
 class FirewallFactory:
     default_jinja_template_path: ClassVar[Path] = Path()
-    default_jinja_template_name: ClassVar[str] = "switch.j2"
+    default_jinja_template_name: ClassVar[str] = "firewall.j2"
 
     def __init__(
         self,
