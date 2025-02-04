@@ -1,0 +1,14 @@
+---
+platform: aruba_os
+name: AP-365
+u_height: 1
+power_consumption: 40
+poe_support: true
+product_family: ap
+interfaces:
+  - name: eth0
+    type: 1000base-t
+  - name: eth1
+    type: 1000base-t
+uplink_interfaces:
+  - eth0

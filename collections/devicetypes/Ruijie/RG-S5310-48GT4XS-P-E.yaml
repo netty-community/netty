@@ -1,0 +1,121 @@
+---
+platform: ruijie_os
+name: RG-S5310-48GT4XS-P-E
+u_height: 1
+power_consumption: 1200
+poe_support: true
+product_family: switch
+interfaces:
+  - name: Gi0/1
+    type: 1000base-t
+  - name: Gi0/2
+    type: 1000base-t
+  - name: Gi0/3
+    type: 1000base-t
+  - name: Gi0/4
+    type: 1000base-t
+  - name: Gi0/5
+    type: 1000base-t
+  - name: Gi0/6
+    type: 1000base-t
+  - name: Gi0/7
+    type: 1000base-t
+  - name: Gi0/8
+    type: 1000base-t
+  - name: Gi0/9
+    type: 1000base-t
+  - name: Gi0/10
+    type: 1000base-t
+  - name: Gi0/11
+    type: 1000base-t
+  - name: Gi0/12
+    type: 1000base-t
+  - name: Gi0/13
+    type: 1000base-t
+  - name: Gi0/14
+    type: 1000base-t
+  - name: Gi0/15
+    type: 1000base-t
+  - name: Gi0/16
+    type: 1000base-t
+  - name: Gi0/17
+    type: 1000base-t
+  - name: Gi0/18
+    type: 1000base-t
+  - name: Gi0/19
+    type: 1000base-t
+  - name: Gi0/20
+    type: 1000base-t
+  - name: Gi0/21
+    type: 1000base-t
+  - name: Gi0/22
+    type: 1000base-t
+  - name: Gi0/23
+    type: 1000base-t
+  - name: Gi0/24
+    type: 1000base-t
+  - name: Gi0/25
+    type: 1000base-t
+  - name: Gi0/26
+    type: 1000base-t
+  - name: Gi0/27
+    type: 1000base-t
+  - name: Gi0/28
+    type: 1000base-t
+  - name: Gi0/29
+    type: 1000base-t
+  - name: Gi0/30
+    type: 1000base-t
+  - name: Gi0/31
+    type: 1000base-t
+  - name: Gi0/32
+    type: 1000base-t
+  - name: Gi0/33
+    type: 1000base-t
+  - name: Gi0/34
+    type: 1000base-t
+  - name: Gi0/35
+    type: 1000base-t
+  - name: Gi0/36
+    type: 1000base-t
+  - name: Gi0/37
+    type: 1000base-t
+  - name: Gi0/38
+    type: 1000base-t
+  - name: Gi0/39
+    type: 1000base-t
+  - name: Gi0/40
+    type: 1000base-t
+  - name: Gi0/41
+    type: 1000base-t
+  - name: Gi0/42
+    type: 1000base-t
+  - name: Gi0/43
+    type: 1000base-t
+  - name: Gi0/44
+    type: 1000base-t
+  - name: Gi0/45
+    type: 1000base-t
+  - name: Gi0/46
+    type: 1000base-t
+  - name: Gi0/47
+    type: 1000base-t
+  - name: Gi0/48
+    type: 1000base-t
+  - name: Te0/49
+    type: 10gbase-x-sfpp
+  - name: Te0/50
+    type: 10gbase-x-sfpp
+  - name: Te0/51
+    type: 10gbase-x-sfpp
+  - name: Te0/52
+    type: 10gbase-x-sfpp
+stack_interfaces:
+  - Te0/51
+  - Te0/52
+uplink_interfaces:
+  - Te0/49
+  - Te0/50
+  - Gi0/48
+  - Gi0/47
+mad_interface: Gi0/48

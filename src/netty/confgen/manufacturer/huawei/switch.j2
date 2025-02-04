@@ -1,0 +1,368 @@
+{%if switch.enable_stack -%}
+---------DO NOT COPY THIS LINE: Master switch stack configuration--------
+interface stack-port 0/1
+    port interface {{switch.stack_config.stack_ports[0]}}
+interface stack-port 0/2
+    port interface {{switch.stack_config.stack_ports[0]}}
+interface {{switch.stack_config.mad_ports[0]}}
+    description to_MAD_port
+    mad detect mode direct
+stack slot 0 priority 200
+---------DO NOT COPY THIS LINE: Slave switch stack configuration--------
+interface stack-port 0/1
+    port interface {{switch.stack_config.stack_ports[0]}}
+interface stack-port 0/2
+    port interface {{switch.stack_config.stack_ports[0]}}
+interface {{switch.stack_config.mad_ports[1]}}
+    description to_MAD_port
+    mad detect mode direct
+stack slot renumber 1 
+{%- endif %}
+
+lldp enable
+dhcp snooping enable
+stelnet server enable
+snmp agent
+error-down auto-recovery cause bpdu-protection interval 300 
+error-down auto-recovery cause error-statistics interval 300
+error-down auto-recovery cause port-security interval 300
+error-down auto-recovery cause mac-address-flapping interval 300
+{% if switch.baseline_config.enable_ipv6 -%}
+ipv6 enable
+ipv6 dhcp snooping enable
+{%- endif %}
+
+undo http server enable
+undo http secure-server enable
+ntp-service server disable
+ntp-service ipv6 server disable
+telnet server disable
+telnet ipv6 server disable
+undo dns resolve
+undo mail-proxy enable
+
+sysname {{switch.hostname}}
+header login information "
+{{switch.baseline_config.default_banner}}"
+{% if switch.enable_guest_acl -%}
+acl name Guest-vlan300-deny 3996          
+    rule 10 permit udp destination any destination-port eq dns
+    rule 15 permit tcp destination any destination-port eq dns
+    rule 20 permit udp destination any destination-port eq bootpc
+    rule 25 permit udp destination any destination-port eq bootps
+    rule 30 permit icmp destination any
+    rule 35 deny ip destination 10.0.0.0 0.255.255.255
+    rule 40 deny ip destination 192.168.0.0 0.0.255.255
+    rule 45 deny ip destination 172.16.0.0 0.15.255.255
+    rule 50 deny ip destination 100.64.0.0 0.63.255.255
+    rule 1000 permit ip
+{%- endif %}
+{% if switch.dhcp_pools-%}
+dhcp enable
+{%for pool in switch.dhcp_pools%}
+ip pool {{pool.dhcp_pool_name}}
+    gateway-list {{pool.dhcp_pool_gateway.ip.compressed}}
+    network {{pool.dhcp_pool_network.network_address}} mask {{pool.dhcp_pool_network.netmask}}
+    dns-list {{pool.dhcp_pool_dns_server[0]}} {{pool.dhcp_pool_dns_server[1]}}
+    lease day 1
+    {%if pool.dhcp_pool_range_start and pool.dhcp_pool_range_end%}
+    ip-range {{pool.dhcp_pool_range_start}} {{pool.dhcp_pool_range_end}}
+    {%endif%}
+    {%if pool.fixed_ips%}
+        {%for ip in pool.fixed_ips%}
+    static-bind ip-address {{ip.ip.ip.compressed}} mac-address {{ip.mac_address}}
+        {%endfor%}
+    {%endif%}
+{%endfor%}
+{%-endif%}
+clock timezone CST add 08:00:00
+ntp-service source-interface Vlanif{{switch.system_config.management_vlan}}
+ntp-service unicast-server {{switch.system_config.ntp_server[0]}}
+ntp server unicast-server {{switch.system_config.ntp_server[1]}}
+
+aaa
+    local-user {{switch.system_config.management_username}} password irreversible-cipher {{switch.system_config.management_password}}
+    local-user {{switch.system_config.management_username}} service-type terminal ssh
+    local-user {{switch.system_config.management_username}} privilege level 15
+    undo local-aaa-user password policy administrator
+username {{switch.system_config.management_username}} privilege 15 password {{switch.system_config.management_password}}
+ssh user {{switch.system_config.management_username}}
+ssh user {{switch.system_config.management_username}} authentication-type password
+ssh user {{switch.system_config.management_username}} service-type stelnet
+
+{% if switch.aaa_config and switch.aaa_config.servers -%}
+    {%if switch.aaa_config.aaa_protocol == "radius"%}
+radius-server template rd
+        {%for index, server in enumerate(switch.aaa_config.servers)%}
+    radius-server authentication {{server.compressed}} {{switch.aaa_config.auth_port}} weight {{(index+1)*40}}
+        {%endfor%}
+    radius-server algorithm master-backup
+    radius-server testuser {{switch.aaa_config.username}} password cipher {{switch.aaa_config.password}}
+    radius-server detect-server interval 60
+    radius-server detect-server timeout 3
+    radius-server retransmit 3 timeout
+    quit
+radius-server dead-interval 5
+radius-server dead-count 2
+radius-server detect-cycle 2
+radius-server max-unresponsive-interval 300
+aaa
+    authentication-scheme auth
+    authentication-mode radius
+    quit
+accounting-scheme acc
+    accounting-mode radius
+    quit
+domain rd
+    authentication-scheme auth
+    accounting-scheme acc
+    radius-server rd
+    quit
+    {%else%}
+domain rd
+hwtacacs-server template tacacs
+    hwtacacs-server authentication {{switch.aaa_config.servers[0]}} {{switch.aaa_config.auth_port}}
+    hwtacacs-server authorization {{switch.aaa_config.servers[0]}} {{switch.aaa_config.auth_port}}
+    hwtacacs-server accounting {{switch.aaa_config.servers[0]}} {{switch.aaa_config.acct_port}}
+    {%if switch.aaa_config.servers[1]%}
+    hwtacacs-server authentication {{switch.aaa_config.servers[1]}} {{switch.aaa_config.auth_port}} secondary
+    hwtacacs-server authorization {{switch.aaa_config.servers[1]}} {{switch.aaa_config.auth_port}} secondary
+    hwtacacs-server accounting {{switch.aaa_config.servers[1]}} {{switch.aaa_config.acct_port}} secondary
+    {%endif%}
+    hwtacacs-server timer response-timeout 3
+    undo hwtacacs-server user-name domain-included
+aaa
+authentication-scheme tacacs             
+    authentication-mode hwtacacs local
+    authorization-scheme tacacs
+    authorization-mode hwtacacs local
+    authorization-cmd 0 hwtacacs local
+    authorization-cmd 15 hwtacacs local
+accounting-scheme tacacs
+    accounting-mode hwtacacs
+    accounting start-fail online
+    recording-scheme tacacs
+recording-mode hwtacacs tacacs
+    cmd recording-scheme tacacs
+    outbound recording-scheme tacacs
+    system recording-scheme tacacs          
+domain rd
+    authentication-scheme tacacs
+    accounting-scheme tacacs
+    authorization-scheme tacacs
+    hwtacacs-server tacacs
+    {%endif%}
+authentication unified-mode
+dot1x-access-profile name d1
+    dot1x authentication-method eap
+    dot1x timer client-timeout 30
+    quit
+authentication-profile name p1
+    dot1x-access-profile d1
+    access-domain rd force
+    quit
+authentication-profile name p1
+    if {{switch.aaa_config.escape_vlan}}
+    authentication event authen-server-down action authorize vlan {{switch.aaa_config.escape_vlan}}
+    authentication event authen-server-up action re-authen
+    quit
+undo authentication pre-authen-access enable
+{%-endif%}
+
+{%if switch.snmp_config.snmp_source_address-%}
+acl name snmp-acl 2999
+    description /**SNMP RO authorized servers/
+    {%for index, addr in enumerate(switch.snmp_config.snmp_source_address)%}
+    rule {{(index+1)*10}} permit source {{addr.network_address.compressed}} {{address.netmask.compressed}}
+    {%endfor%}
+    rule 1000 deny logging
+{%-endif%}
+{% if switch.snmp_config.snmp_version == "v2c"-%}
+snmp-agent
+snmp-agent community read cipher {{switch.snmp_config.snmp_community}} mib-view iso-view {%if switch.snmp_config.snmp_source_address%} acl 2999 {%endif%}
+snmp-agent sys-info version v2c
+snmp-agent mib-view included iso-view iso
+snmp-agent protocol source-status Vlanif {{switch.system_config.management_vlan}}
+{% elif switch.snmp_config.snmp_version =="v3" %}
+snmp-agent
+snmp-agent sys-info version v3
+snmp-agent group v3 netgroup privacy read-view MIB-2 {%if switch.snmp_config.snmp_source_address-%} acl 2999 {%-endif%}
+snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}}
+snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} group {{switch.snmp_config.snmp_v3_security_name}}
+snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} authentication-mode {{switch.snmp_config.snmp_v3_auth_protocol}} cipher {{switch.snmp_config.snmp_v3_auth_password}}
+snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} privacy-mode {{switch.snmp_config.snmp_v3_priv_protocol}}  cipher {{switch.snmp_config.snmp_v3_priv_password}}
+    {%if switch.snmp_config.snmp_source_address%}
+snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} acl 2999
+    {%endif%}
+{%-endif%}
+{%if switch.snmp_config.enable_trap-%}
+snmp-agent enable traps
+snmp-agent host {{switch.snmp_config.snmp_trap_server.compressed}} traps {{switch.snmp_config.snmp_trap_password}}
+snmp-server trap-source Vlanif {{switch.management_vlan}}
+{%-endif%}
+
+{%if switch.system_config.syslog_server-%}
+info-center source default channel 3 trap level informational
+info-center channel 2 name logser1
+info-center loghost source Vlanif {{switch.management_vlan}}
+info-center loghost {{switch.system_config.syslog_server}} facility local2 local-time
+info-center logbuffer size 1024
+info-center timestamp debugging format-date precision-time tenth-second
+{%-endif%}
+
+{%if switch.baseline_config.enable_netflow and switch.netflow_config -%}
+    {%if switch.flow_type == "sflow"%}
+sflow collector 1 ip {{switch.netflow_config.flow_export_address}}
+sflow collector 1 port {{switch.netflow_config.sflow_default_port}}
+sflow agent  {{switch.management_ip}}
+    {%for if_name in switch.netflow_config.export_flow_interfaces%}
+interface {{if_name}}
+    sflow flow-sampling collector 1
+    sflow flow-sampling rate 4096
+    sflow flow-sampling inbound
+    sflow flow-sampling outbound
+    sflow counter collector 1
+    {%endfor%}
+    {%else%}
+ip netstream timeout active 60
+ip netstream timeout inactive 10
+ip netstream export version 9
+ip netstream export source {{switch.management_ip.ip}}
+ip netstream export host {{switch.netflow_config.flow_export_address}} {{switch.netflow_config.netstream_default_port}}
+ip netstream export template timeout-rate 1
+ip netstream export index-switch 32
+ip netstream tcp-flag enable
+ipv6 netstream export version 9
+ipv6 netstream export source {{switch.management_ip.ip}}
+ipv6 netstream export host {{switch.netflow_config.flow_export_address}} {{switch.netflow_config.netstream_default_port}}
+    {%for if_name in switch.netflow_config.export_flow_interfaces%}
+interface {{if_name}}
+    ip netstream inbound
+    ip netstream outbound
+    ipv6 netstream inbound
+    ipv6 netstream outbound
+    {%endfor%}
+    {%endif%}
+
+{%-endif%}
+
+stp region-configuration
+    revision-level 1
+    region-name mst
+    instance 0 vlan 2-4094
+    active region-configuration
+{% if switch.stp_root-%}
+stp instance 0 priority {{switch.stp_priority}}
+stp instance 1 priority {{switch.stp_priority}}
+{%-endif%}
+
+{% if switch.vlans -%}
+{%for v in switch.vlans%}
+vlan {{v.vlan_id}}
+{%if not v.vlan_name%}
+    name {{switch.site_code}}-{{v.vlan_id}}
+{%elif switch.site_code.lower() not in v.vlan_name.lower()%}
+    name {{switch.site_code}}-{{v.vlan_name}}
+{%else%}
+    name {{v.vlan_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{%if switch.vlan_ifs-%}
+{%for vlan_if in switch.vlan_ifs%}
+interface vlan {{vlan_if.vlan_id}}
+    ip address {{vlan_if.gateway.ip.compressed}} {{vlan_if.network.netmask}}
+{%if vlan_if.vlan_name%}
+    description {{vlan_if.vlan_name}}
+{%endif%}
+{%if 'guest' in vlan_if.vlan_name.lower() and switch.enable_guest_acl%}
+    traffic-filter Guest-vlan300 inbound
+{%endif%}
+{%if vlan_if.vrf_name%}
+    ip vrf {{vlan_if.vrf_name}}
+{%endif%}
+{%if vlan_if.enable_dhcp%}
+    dhcp select global
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{%if switch.physical_ifs-%}
+{%for interface in switch.physical_ifs%}
+interface {{interface.if_name}}
+    undo portswitch
+    ip address {{interface.if_addr.ip.compressed}} {{interface.if_addr.netmask}}
+{%if interface.mtu%}
+    mtu {{interface.mtu}}
+{%endif%}
+{%if interface.if_descr%}
+    description {{interface.if_descr}}
+{%endif%}
+{%if interface.vrf_name%}
+    ip vrf {{interface.vrf_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{%if switch.port_channels-%}
+{%for port in switch.port_channels%}
+interface Eth-trunk {{port.port_channel_id}}
+{%if port.if_descr%}
+    description {{interface.if_descr}}
+{%endif%}
+{%if port.if_mode=="trunk"%}
+    port link-type trunk
+    port trunk allow vlan all
+{%else%}
+    port link-type access
+    port default vlan {{port.vlan_id}}
+{%endif%}
+{%if port.dhcp_snooping_trust%}
+    ip dhcp snooping trust
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{% if switch.interfaces-%}
+{%for interface in switch.interfaces%}
+interface {{interface.if_name}}
+{%if interface.if_descr%}
+    description {{interface.if_descr}}
+{%endif%}
+{% if interface.port_channel_id %}
+    port-group {{interface.port_channel_id}} mode active
+{%elif interface.if_mode=="trunk"%}
+    port link-type trunk
+    port trunk allow vlan all
+{%else%}
+    port link-type access
+    port default vlan {{interface.vlan_id}}
+{%endif%}
+{%if interface.dhcp_snooping_trust%}
+    ip dhcp snooping trust
+{%endif%}
+{%if interface.portfast%}
+    spanning-tree portfast
+    spanning-tree bpduguard enable
+    rdlp port loop-detect shutdown-port
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+user-interface maximum-vty {{switch.system_config.max_line_vty}}
+user-interface con 0
+    authentication-mode password
+    set authentication password cipher {{switch.management_password}}
+    idle-timeout 5 0
+user-interface vty 0 {{switch.system_config.max_line_vty-1}}                  
+    authentication-mode local
+    idle-timeout 10 0
+
+{% if switch.default_gateway-%}
+{%if switch.default_gateway.version == 4%}
+ip route-static 0.0.0.0 0.0.0.0 {{switch.default_gateway.compressed}} description default_route
+{%else%}
+ipv6 route-static :: 0 {{switch.default_gateway.compressed}} description default_route
+{%endif%}
+{%endif%}

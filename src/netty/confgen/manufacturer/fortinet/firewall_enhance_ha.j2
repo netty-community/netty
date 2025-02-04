@@ -1,0 +1,264 @@
+
+{%if firewall.enable_ha %}
+{% if firewall.device_type.name in ("FortiGate 60F", "FortiGate 80F", "FortiGate 90G", "FortiGate 100F")%}
+---------DO NOT COPY THIS LINE: Master firewall HA configuration--------
+config system interface
+    edit internal
+        unselect member {{firewall.device_type.lan_ports[0]}} {{firewall.device_type.lan_ports[1]}}
+    next
+    edit fortilink
+        unselect member {{firewall.device_type.ha_ports[0]}} {{firewall.device_type.ha_ports[0]}}
+    next
+end
+config system ha
+    set group-id 1
+    set group-name "ha-group"
+    set mode a-p
+    set password {{firewall.ha_password}}
+    set hbdev {{firewall.device_type.ha_ports[0]}} {{firewall.device_type.ha_ports[0]}}
+    set session-pickup enable
+    set override disable
+    set priority 200
+    set monitor {{firewall.device_type.lan_ports[0]}} {{firewall.device_type.lan_ports[1]}}
+---------DO NOT COPY THIS LINE: Slave firewall HA configuration--------
+config system interface
+    edit internal
+        unselect member {{firewall.device_type.lan_ports[0]}} {{firewall.device_type.lan_ports[1]}}
+    next
+    edit fortilink
+        unselect member {{firewall.device_type.ha_ports[0]}} {{firewall.device_type.ha_ports[0]}}
+    next
+end
+config system ha
+    set group-id 1
+    set group-name "ha-group"
+    set mode a-p
+    set password {{firewall.ha_password}}
+    set hbdev {{firewall.device_type.ha_ports[0]}} {{firewall.device_type.ha_ports[0]}}
+    set session-pickup enable
+    set override disable
+    set priority 150
+    set monitor {{firewall.device_type.lan_ports[0]}} {{firewall.device_type.lan_ports[1]}}
+{%endif%}
+{% endif %}
+
+
+config system global
+    set hostname {{firewall.hostname}}
+    set language simch
+    set admin-sport 8443
+    set timezone 55
+    set admintimeout 10
+    set lldp-reception enable
+    set gui-firmware-upgrade-warning disable
+    set gui-forticare-registration-setup-warning disable
+{%if firewall.system_config.syslog_server%}
+config log syslogd setting
+    set status enable
+    set server {{firewall.system_config.syslog_server.compressed}}
+end
+{%endif%}
+
+{%if firewall.system_config.firewall_manager%}
+config system  central-management
+    set type fortimanager
+    set fmg {{firewall.system_config.firewall_manager.compressed}}
+end
+{%endif%}
+
+config system admin
+    edit "admin"
+        set accprofile "super_admin"
+        set vdom "root"
+        set password {{firewall.management_password}}
+    next
+    edit "netops"
+        set accprofile "super_admin"
+        set vdom "root"
+        set password {{firewall.management_password}}
+    next
+end
+
+config system snmp sysinfo
+    set status enable
+end
+config system snmp community
+    edit 1
+        set name {{firewall.snmp_config.community}}
+        config hosts
+        {%if firewall.snmp_config.snmp_source%}
+        {%for index, addr in enumerate(firewall.snmp_config.snmp_source)%}
+            edit {{index}}
+                set ip {{addr.compressed}} {{addr.netmask}}
+                set host-type query
+            next
+        {%endfor%}
+        {%endif%}
+        end
+        set query-v1-status disable
+        set trap-v1-status disable
+        set trap-v2c-status disable
+    next
+end
+
+
+config system interface
+    edit {{firewall.default_lan_agg_port_name}}
+        set vdom "root"
+        set ip {{firewall.lan_ip.compressed}}/{{firewall.lan_ip.netmask}}
+        set allowaccess ping https ssh snmp http
+        set type aggregate
+        set member {{firewall.device_type.lan_ports[0]}} {{firewall.device_type.lan_ports[1]}}
+        set device-identification enable
+        set lldp-reception enable
+        set lldp-transmission enable
+        set role lan
+    next
+end
+
+{%if firewall.int_sw_uplink or firewall.enhance_ha_trunk_mode%}
+config system global
+    set virtual-switch-vlan enable
+end
+
+{%for wan in firewall.wan_networks%}
+    {%if wan.ip_addr and wan.gateway%}
+config system interface
+    edit {{wan.provider}}-{{wan.bandwidth}}
+        set ip {{wan.ip_addr.ip.compressed}} {{wan.ip_addr.netmask}}
+        set allowaccess ping https ssh fgfm
+        set type hard-switch
+        set role wan
+    next
+end
+    {%elif wan.pppoe_username and wan.pppoe_password %}
+config system pppoe-interface
+    edit {{wan.provider}}-{{wan.bandwidth}}
+        set device {{wan.port_name}}
+        set username {{wan.pppoe_username}}
+        set password {{wan.pppoe_password}}
+    next
+end
+config system interface
+    edit {{wan.provider}}-{{wan.bandwidth}}
+        set type hard-switch
+        set allowaccess ping https ssh fgfm
+        set role wan
+    next
+end
+    {%endif%}
+{%endfor%}
+
+{% if firewall.enhance_ha_trunk_mode%}
+config system interface
+    edit {{firewall.enhance_ha_trunk_port}}
+        set trunk enable
+        set alias "isp-data-trunk"
+    next
+end
+config system virtual-switch
+{%for index, wan in enumerate(firewall.wan_networks)%}
+    edit {{wan.provider}}-{{wan.bandwidth}}
+        set vlan {{(index+1)*100}}
+        config port
+            edit wan.port_name
+            next
+        end
+    next    
+{%endfor%}
+end
+{%endif%}
+{%endif%}
+config route static
+{%for index, value in enumerate(firewall.lan_networks)%}
+    edit {{index+1}}
+        set dst {{value.network.network_address}} {{value.network.netmask}}
+        set gateway {{ firewall.lan_gateway.compressed}}
+        set device {{firewall.default_lan_agg_port_name}}
+    next
+{%endfor%}
+end
+
+config system sdwan
+    set status enable
+    config zone
+        edit "virtual-wan-link"
+        next
+    end
+    config members
+{%for index, wan in enumerate(firewall.wan_networks)%}
+        edit {{index+1}}
+            set interface {{wan.provider}}-{{wan.bandwidth}}
+            set gateway {{wan.gateway.compressed}}
+        next
+{%endfor%}
+    end
+    config health-check
+        edit "wan_link_dns_probe_ping"
+            set server {{wan.probe_icmp_ping_target.compressed}}
+            set protocol ping
+            set interval 1000
+            set recoverytime 10
+            set probe-timeout 1000
+            set update-static-route enable
+            set members 0
+            config sla
+                edit 1
+                    set latency-threshold 250
+                    set jitter-threshold 50
+                    set packetloss-threshold 5
+                next
+            end
+        next
+    end
+    config service
+        edit 1
+            set name "internet-load-balancing"
+            set mode "load-balance"
+            set dst "all"
+            set src "all"
+            config sla
+                edit "wan_link_dns_probe_ping"
+                    set id 1
+                next
+            end
+            set priority-members 2 1
+        next
+    end
+end
+
+config router static
+    edit 0
+        set distance 1
+        set sdwan-zone "virtual-wan-link"
+    next
+end
+{% set lan_addr = ""%}
+config firewall address
+{%for index, lan in enumerate(firewall.lan_networks)%}
+    {%if lan.enable_nat%}
+    {% set lan_addr+='"'{{lan.network}}'" '%}
+    {%endif%}
+    edit {{index+1}}
+        set name "{{lan.network}}"
+        set associated-interface {{firewall.default_lan_agg_port_name}}
+        set subnet {{value.network.network_address}} {{value.network.netmask}}
+    next
+{%endfor%}
+end
+config firewall policy
+    edit 1
+        set name nat-policy-wan
+        set srcintf {{firewall.default_lan_agg_port_name}}
+        set dstintf "virtual-wan-link"
+        set action accept
+        set srcaddr {{lan_addr}}
+        set dstaddr "all"
+        set scheduler "always"
+        set service "ALL"
+        set logtraffic all
+        set nat enable
+    next
+end
+
+    

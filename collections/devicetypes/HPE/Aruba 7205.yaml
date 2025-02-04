@@ -1,0 +1,27 @@
+---
+platform: aruba_os
+name: Aruba 7205
+u_height: 1
+power_consumption: 40
+poe_support: true
+product_family: wlc
+interfaces:
+  - name: Gi0/1
+    type: 1000base-t
+  - name: Gi0/2
+    type: 1000base-t
+  - name: Gi0/3
+    type: 1000base-t
+  - name: Gi0/4
+    type: 1000base-t
+  - name: Gi0/5
+    type: 1000base-t
+  - name: Gi0/6
+    type: 1000base-t
+  - name: Gi0/7
+    type: 1000base-t
+  - name: Gi0/8
+    type: 1000base-t
+uplink_interfaces:
+  - Gi0/1
+  - Gi0/2

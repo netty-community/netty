@@ -1,0 +1,79 @@
+---
+platform: fortinet
+name: FortiGate 200F
+u_height: 1
+power_consumption: 20
+product_family: firewall
+interfaces:
+  - name: ha
+    type: 1000base-t
+  - name: mgmt
+    type: 1000base-t
+  - name: port1
+    type: 1000base-t
+  - name: port2
+    type: 1000base-t
+  - name: port3
+    type: 1000base-t
+  - name: port4
+    type: 1000base-t
+  - name: port5
+    type: 1000base-t
+  - name: port6
+    type: 1000base-t
+  - name: port7
+    type: 1000base-t
+  - name: port8
+    type: 1000base-t
+  - name: port9
+    type: 1000base-t
+  - name: port10
+    type: 1000base-t
+  - name: port11
+    type: 1000base-t
+  - name: port12
+    type: 1000base-t
+  - name: port13
+    type: 1000base-t
+  - name: port14
+    type: 1000base-t
+  - name: port15
+    type: 1000base-t
+  - name: port16
+    type: 1000base-t
+  - name: port17
+    type: 1000base-x-sfp
+  - name: port18
+    type: 1000base-x-sfp
+  - name: port19
+    type: 1000base-x-sfp
+  - name: port20
+    type: 1000base-x-sfp
+  - name: port21
+    type: 1000base-x-sfp
+  - name: port22
+    type: 1000base-x-sfp
+  - name: port23
+    type: 1000base-x-sfp
+  - name: port24
+    type: 1000base-x-sfp
+  - name: x1
+    type: 10gbase-x-sfpp
+  - name: x2
+    type: 10gbase-x-sfpp
+  - name: x3
+    type: 10gbase-x-sfpp
+  - name: x4
+    type: 10gbase-x-sfpp
+ha_ports:
+  - port11
+  - port12
+  - x1
+  - x2
+lan_ports:
+  - port9
+  - port10
+enhance_ha_port: x1
+uplink_interfaces:
+  - wan1
+  - wan2

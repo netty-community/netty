@@ -1,0 +1,251 @@
+{# https://community.fortinet.com/t5/FortiGate/Technical-Tip-How-to-configure-ADVPN-to-be-scalable-using/ta-p/330112#}
+config system interface
+    edit "loopback1"
+        set vdom "root"
+        set ip {{firewall.sdwan.bgp_router_id.compressed}} {{firewall.bgp_router_id.netmask}}
+        set allowaccess ping
+        set type loopback
+    next
+    {%if firewall.sdwan.hub_ha_enable %}
+    edit "loopback2"
+        set vdom "root"
+        set ip {{firewall.sdwan.spoke_sla_target.compressed}} {{firewall.sdwan.spoke_sla_target.compressed}}
+        set allowaccess ping
+        set type loopback
+    next
+    {%endif%}
+end
+config system settings
+    set location-id {{firewall.bgp_router_id.tunnel_ip.compressed}}
+end
+
+config vpn ipsec phase1-interface
+    edit "HubADVPN"
+        set type dynamic
+        set interface "port1"
+        set ike-version 2
+        set peertype any
+        set net-device disable
+        set exchange-ip-addr4 {{firewall.sdwan.bgp_router_id.compressed}}
+        set proposal aes256gcm-prfsha384
+        set add-route disable
+        set dpd on-idle
+        set dhgrp 14
+        set auto-discovery-sender disable
+        set network-overlay enable
+        set network-id 10
+        set psksecret {{firewall.sdwan.ipsec_psk}}
+        set dpd-retrycount 2
+        set dpd-retryinterval 1
+    next
+end
+config vpn ipsec phase2-interface
+    edit "HubADVPN"
+        set phase1name "HubADVPN"
+        set proposal aes256gcm
+        set keepalive enable
+    next
+end
+
+config firewall address
+    edit "{{firewall.spoke.site_code}}"
+        set subnet {{firewall.spoke.network.network}} {{firewall.spoke.network.netmask}}
+    next
+    edit "Hub-SLA-Loopback"
+        set subnet {{firewall.sdwan.spoke_sla_target.network}} {{firewall.sdwan.spoke_sla_target.compressed}}
+    next
+    edit "Hub-Lan-network"
+        set subnet {{firewall.hub.lan}}
+    next
+end
+
+config system sdwan
+    set status enable
+        config zone
+            edit "Underlay"
+            next
+            edit "ADVPN"
+            next
+        end
+        config members
+            edit 1
+                set interface {{firewall.isp_port}}
+                set zone "Underlay"
+                set gateway {{firewall.isp_gateway}}
+            next
+            edit 2
+                set interface "HubADVPN"
+                set zone "ADVPN"
+                set source {{firewall.sdwan.bgp_router_id.compressed}}
+            next
+        end
+    end
+    config health-check
+        edit "wan_link_dns_probe_ping"
+            set server "223.5.5.5" "223.6.6.6"
+            set members 1
+            config sla
+                edit 1
+                    set latency-threshold 50
+                    set jitter-threshold 3
+                    set packetloss-threshold 1
+                next
+            end
+        next
+    end
+    config service
+        edit 2
+            set name "{{firewall.spoke.site_code}}"
+            set dst {{firewall.spoke.site_code}}
+            set src "Hub-Lan-network"
+            set priority-members 2
+        next
+        edit 1
+            set name "InternetRule"
+            set mode sla
+            set dst "all"
+            set src "all"
+            config sla
+                edit "wan_link_dns_probe_ping"
+                    set id 1
+                next
+            end
+            set priority-members 1
+        next
+    end
+end
+
+config firewall policy
+    edit 1
+        set name "Internet Policy"
+        set srcintf "port3"
+        set dstintf "Underlay"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set nat enable
+    next
+    edit 2
+        set name "LAN to ADVPN"
+        set srcintf "port3"
+        set dstintf "ADVPN"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+    next
+    edit 3
+        set name "ADVPN to LAN"
+        set srcintf "ADVPN"
+        set dstintf "port3"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+    next
+    edit 4
+        set name "ADVPN to ADVPN"
+        set srcintf "ADVPN"
+        set dstintf "ADVPN"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "Spoke-Subnets"
+        set schedule "always"
+        set service "ALL"
+    next
+    edit 5
+        set name "BGP Peering Policy Inbound"
+        set srcintf "ADVPN"
+        set dstintf "loopback1"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "BGP" "PING"
+    next
+    edit 6
+        set name "VPN to SLA loopback"
+        set srcintf "ADVPN"
+        set dstintf "loopback2"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "Hub-SLA_Loopback"
+        set schedule "always"
+        set service "PING"
+    next
+end
+config router route-map
+    edit "LOCAL_REGION"
+        config rule
+            edit 1
+                set set-community "no-export"
+            next
+        end
+    next
+end
+
+config router bgp
+    set as 65000
+    set router-id {{firewall.sdwan.bgp_router_id.compressed}}
+    set keepalive-timer 15
+    set holdtime-timer 45
+    set ebgp-multipath enable
+    set ibgp-multipath enable
+    set recursive-next-hop enable
+    set recursive-inherit-priority enable
+    config neighbor-group
+        edit "Spokes"
+            set advertisement-interval 1
+            set next-hop-self enable
+            set soft-reconfiguration enable
+            set interface "loopback1"
+            set remote-as 65000
+            set update-source "loopback1"
+        next
+    config neighbor-range
+        edit 3
+            set prefix {{firewall.spoke.range.network}} {{firewall.spoke.range.netmask}}
+            set neighbor-group "Spokes"
+        next
+    end
+    config network
+        edit 3
+            set prefix {{firewall.hub.lan.network}} {{firewall.hub.lan.netmask}}
+            next
+        edit 2
+            set prefix {{firewall.inter_conn.network}} {{firewall.inter_conn.netmask}}
+            set route-map "LOCAL_REGION"
+        next
+    end
+config route static
+    edit 1
+        set distance 1
+        set sdwan-zone "Underlay"
+    next
+    edit 2
+        set dst {{firewall.inter_conn.network}} {{firewall.inter_conn.netmask}}
+        set comment "Prevents recursive lookup on the spokes to use the underlay and allows BGP to advertise this subnet to the spokes"
+        set blackhole enable
+        set vrf 0
+    next
+    edit 3
+        set dst {{firewall.hub.lan.network}} {{firewall.hub.lan.netmask}}
+        set comment "Prevents corporate traffic from leaking out on the underlay"
+        set blackhole enable
+        set vrf 0
+    next
+end
+
+config router policy
+    edit 1
+        set input-device "HubADVPN"
+        set srcaddr "all"
+        set dstaddr "Spoke-Subnets"
+        set output-device "HubADVPN"
+    next
+end
+

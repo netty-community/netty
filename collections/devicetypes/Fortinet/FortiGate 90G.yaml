@@ -1,0 +1,36 @@
+---
+platform: fortinet
+name: FortiGate 80F
+u_height: 1
+power_consumption: 20
+product_family: firewall
+interfaces:
+  - name: internal1
+    type: 1000base-t
+  - name: internal2
+    type: 1000base-t
+  - name: internal3
+    type: 1000base-t
+  - name: internal4
+    type: 1000base-t
+  - name: internal5
+    type: 1000base-t
+  - name: internal6
+    type: 1000base-t
+  - name: a
+    type: 1000base-t
+  - name: b
+    type: 1000base-t
+  - name: wan1
+    type: 10gbase-x-sfpp
+    # combo with 10gbase-t
+  - name: wan2
+    type: 10gbase-x-sfpp
+    # combo with 10gbase-t
+ha_ports:
+  - a
+  - b
+lan_ports:
+  - internal3
+  - internal4
+enhance_ha_port: internal5

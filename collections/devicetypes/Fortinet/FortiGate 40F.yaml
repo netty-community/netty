@@ -1,0 +1,19 @@
+---
+platform: fortinet
+name: FortiGate 40F
+u_height: 1
+power_consumption: 20
+product_family: firewall
+interfaces:
+  - name: wan
+    type: 1000base-t
+  - name: A
+    type: 1000base-t
+  - name: lan1
+    type: 1000base-t
+  - name: lan2
+    type: 1000base-t
+  - name: lan3
+    type: 1000base-t
+lan_port:
+  - lan3
