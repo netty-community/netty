@@ -10,6 +10,8 @@ config system interface
         unselect member {{firewall.device_type.ha_ports[0]}} {{firewall.device_type.ha_ports[0]}}
     next
 end
+config system global
+    set hostname {{firewall.hostname}}
 config system ha
     set group-id 1
     set group-name "ha-group"
@@ -29,6 +31,8 @@ config system interface
         unselect member {{firewall.device_type.ha_ports[0]}} {{firewall.device_type.ha_ports[0]}}
     next
 end
+config system global
+    set hostname {{firewall.slave_hostname}}
 config system ha
     set group-id 1
     set group-name "ha-group"
@@ -42,9 +46,7 @@ config system ha
 {%endif%}
 {% endif %}
 
-
 config system global
-    set hostname {{firewall.hostname}}
     set language simch
     set admin-sport 8443
     set timezone 55
@@ -68,11 +70,6 @@ end
 
 config system admin
     edit "admin"
-        set accprofile "super_admin"
-        set vdom "root"
-        set password {{firewall.management_password}}
-    next
-    edit "netops"
         set accprofile "super_admin"
         set vdom "root"
         set password {{firewall.management_password}}

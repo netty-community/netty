@@ -241,6 +241,11 @@ interface AggregatePort {{port.port_channel_id}}
 {%if port.if_descr%}
     description {{port.if_descr}}
 {%endif%}
+{% if port.enable_netflow%}
+    sflow flow collector 1
+    sflow counter collector 1
+    sflow enable
+{%endif%}
 {%if port.if_mode=="trunk"%}
     switchport mode trunk
     switchport trunk allow vlan all
@@ -259,6 +264,11 @@ interface AggregatePort {{port.port_channel_id}}
 interface {{interface.if_name}}
 {%if interface.if_descr%}
     description {{interface.if_descr}}
+{%endif%}
+{% if interface.enable_netflow%}
+    sflow flow collector 1
+    sflow counter collector 1
+    sflow enable
 {%endif%}
 {% if interface.port_channel_id %}
     port-group {{interface.port_channel_id}} mode active

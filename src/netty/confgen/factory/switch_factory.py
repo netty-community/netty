@@ -240,8 +240,6 @@ class SwitchFactory:
             if interface.port_channel_id is None:
                 continue
             if interface.port_channel_id not in unique_port_channels:
-                unique_port_channels.append(interface.port_channel_id)
-            else:
                 results.append(
                     PortChannel(
                         port_channel_id=interface.port_channel_id,
@@ -253,6 +251,7 @@ class SwitchFactory:
                         vlan_id=interface.vlan_id,
                     )
                 )
+                unique_port_channels.append(interface.port_channel_id)
         return results
 
     def enrich_data(self) -> Switch:

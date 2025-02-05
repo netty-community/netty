@@ -288,8 +288,8 @@ interface vlan {{vlan_if.vlan_id}}
 {%endfor%}
 {%-endif%}
 
-{%if switch.physical_ifs-%}
-{%for interface in switch.physical_ifs%}
+{%if switch.routed_ifs-%}
+{%for interface in switch.routed_ifs%}
 interface {{interface.if_name}}
     undo portswitch
     ip address {{interface.if_addr.ip.compressed}} {{interface.if_addr.netmask}}
@@ -311,6 +311,20 @@ interface Eth-trunk {{port.port_channel_id}}
 {%if port.if_descr%}
     description {{interface.if_descr}}
 {%endif%}
+{% if interface.enable_netflow%}
+    {%if switch.flow_type == "sflow"%}
+    sflow sampling collector 1
+    sflow sampling rate {{switch.netflow_config.flow_sample_rate}}
+    sflow sampling inbound
+    sflow sampling outbound
+    sflow counter collector 1
+    {%else%}
+    ip netstream inbound
+    ip netstream outbound
+    ip netstream sampler fix-packets {{switch.netflow_config.flow_sample_rate}} inbound
+    ip netstream sampler fix-packets {{switch.netflow_config.flow_sample_rate}} outbound
+    {%endif%}
+{%endif%}
 {%if port.if_mode=="trunk"%}
     port link-type trunk
     port trunk allow vlan all
@@ -324,11 +338,25 @@ interface Eth-trunk {{port.port_channel_id}}
 {%endfor%}
 {%-endif%}
 
-{% if switch.interfaces-%}
-{%for interface in switch.interfaces%}
+{% if switch.physical_ifs-%}
+{%for interface in switch.physical_ifs%}
 interface {{interface.if_name}}
 {%if interface.if_descr%}
     description {{interface.if_descr}}
+{%endif%}
+{% if interface.enable_netflow%}
+    {%if switch.flow_type == "sflow"%}
+    sflow sampling collector 1
+    sflow sampling rate {{switch.netflow_config.flow_sample_rate}}
+    sflow sampling inbound
+    sflow sampling outbound
+    sflow counter collector 1
+    {%else%}
+    ip netstream inbound
+    ip netstream outbound
+    ip netstream sampler fix-packets {{switch.netflow_config.flow_sample_rate}} inbound
+    ip netstream sampler fix-packets {{switch.netflow_config.flow_sample_rate}} outbound
+    {%endif%}
 {%endif%}
 {% if interface.port_channel_id %}
     port-group {{interface.port_channel_id}} mode active

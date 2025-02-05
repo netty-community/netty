@@ -69,6 +69,11 @@ def remove_duplicate_devices(devices: list[Device]) -> list[Device]:
 def remove_stack_ports(
     devices: list[Device], connections: list[Connection]
 ) -> tuple[list[Connection], list[Device]]:
+    """
+    Remove stack ports from connections, switch stack ports and firewall HA ports will be removed
+    and added to device.stack_ports. due to specical firewall connection and differnet vendors implementation
+    there is no way to recognize firewall MAD(or monitoring) ports, need adjust configuration manually 
+    """
     result = []
     devices = __sort_devices(devices)
     device_hostname_mapping = {device.hostname: device for device in devices}
@@ -79,35 +84,45 @@ def remove_stack_ports(
             local_device
             and remote_device
             and local_device.management_ip == remote_device.management_ip
-            and "switch" in local_device.device_role.lower()
         ):  
-            if not local_device.stack_port:
-                local_device.stack_port = StackPort(mad_ports=[], stack_ports=[])
-            if not remote_device.stack_port:
-                remote_device.stack_port = StackPort(mad_ports=[], stack_ports=[])
-            if interfaces_have_same_sub_port_number(
-                conn.local_interface_name, conn.remote_interface_name
-            ):
-                local_device.stack_port.mad_ports.extend([
-                    process_interface_name(conn.local_interface_name, 1),
-                    process_interface_name(conn.remote_interface_name, 2),
-                ])
-                remote_device.stack_port.mad_ports.extend([
-                    process_interface_name(conn.local_interface_name, 1),
-                    process_interface_name(conn.remote_interface_name, 2),
-                ])
+            if "switch" in local_device.device_role.lower():
+                if not local_device.stack_port:
+                    local_device.stack_port = StackPort(mad_ports=[], stack_ports=[])
+                if not remote_device.stack_port:
+                    remote_device.stack_port = StackPort(mad_ports=[], stack_ports=[])
+                if interfaces_have_same_sub_port_number(
+                    conn.local_interface_name, conn.remote_interface_name
+                ):
+                    local_device.stack_port.mad_ports.extend([
+                        process_interface_name(conn.local_interface_name, 1),
+                        process_interface_name(conn.remote_interface_name, 2),
+                    ])
+                    remote_device.stack_port.mad_ports.extend([
+                        process_interface_name(conn.local_interface_name, 1),
+                        process_interface_name(conn.remote_interface_name, 2),
+                    ])
+                else:
+                    local_device.stack_port.stack_ports = [
+                        conn.local_interface_name,
+                        conn.remote_interface_name
+                    ]
+                    remote_device.stack_port.stack_ports = [
+                        conn.local_interface_name,
+                        conn.remote_interface_name
+                    ]
+            elif "firewall" in local_device.device_role.lower():
+                if not local_device.stack_port:
+                    local_device.stack_port = StackPort(mad_ports=[], stack_ports=[])
+                if conn.local_interface_name ==conn.remote_interface_name:
+                    local_device.stack_port.mad_ports.extend([
+                        conn.local_interface_name, conn.remote_interface_name
+                    ])
             else:
-                local_device.stack_port.stack_ports = [
-                    conn.local_interface_name,
-                    conn.remote_interface_name
-                ]
-                remote_device.stack_port.stack_ports = [
-                    conn.local_interface_name,
-                    conn.remote_interface_name
-                ]
+                result.append(conn)
         else:
             result.append(conn)
     return result, devices
+
 
 
 def firewall_working_mode(devices: list[Device]) -> FirewallWanHAMode:

@@ -72,11 +72,6 @@ config system admin
         set vdom "root"
         set password {{firewall.management_password}}
     next
-    edit "netops"
-        set accprofile "super_admin"
-        set vdom "root"
-        set password {{firewall.management_password}}
-    next
 end
 
 config system snmp sysinfo

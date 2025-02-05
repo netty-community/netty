@@ -14,7 +14,7 @@ limitations under the License.
 
 from enum import StrEnum
 
-from pydantic import BaseModel, Field, PositiveInt
+from pydantic import BaseModel, Field, PositiveInt, model_validator
 
 from netty.arch.platform import Platform
 
@@ -85,6 +85,13 @@ class DeviceType(BaseModel):
     @property
     def interface_set(self) -> set[str]:
         return {interface.name for interface in self.interfaces}
+    
+    @model_validator(mode="after")
+    def validate_port(self)->"DeviceType":
+        if self.product_family == ProductFamily.firewall:
+            if not self.lan_ports and not self.ha_ports:
+                raise ValueError(f"Firewall model {self.name} must have at least one lan port or ha port")
+        return self
 
 
 def interface_type_mapping(if_type: str) -> InterfaceType:
