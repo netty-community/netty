@@ -85,6 +85,8 @@ def enrich_devices_and_connections(
     management_ip_count:dict[IPvAnyAddress, int] = defaultdict(int)
     cluster: dict[IPvAnyAddress, list[Device]] = defaultdict(list)
     for device in sorted_devices:
+        if device.device_role == DeviceRole.wlan_ap:
+            continue
         management_ip_count[device.management_ip] += 1
     for device in sorted_devices:
         if management_ip_count[device.management_ip] > 1:
@@ -102,7 +104,7 @@ def enrich_devices_and_connections(
             remote_interface = match_interface_by_port_id(remote_device.device_type.interface_set, int(conn.remote_interface_name))
         else:
             remote_interface = conn.remote_interface_name
-        if local_device and local_device.device_role != DeviceRole.firewall:
+        if local_device and local_device.device_role not in (DeviceRole.firewall, DeviceRole.wlan_ap):
             if local_device.stacked and remote_device and local_device.management_ip == remote_device.management_ip:
                 if conn.if_type == InterfaceType.base_stack_port:
                     conn.local_interface_name = local_interface
@@ -117,7 +119,7 @@ def enrich_devices_and_connections(
                 if local_interface:
                     local_interface = process_interface_name(local_interface, index + 1) # type: ignore
             conn.local_interface_name = local_interface  # type: ignore
-        if remote_device and remote_interface and remote_device.device_role != DeviceRole.firewall:
+        if remote_device and remote_interface and remote_device.device_role not in (DeviceRole.firewall, DeviceRole.wlan_ap):
             if remote_device.stacked and local_device:
                 index = cluster[remote_device.management_ip].index(remote_device)
                 if remote_interface:
