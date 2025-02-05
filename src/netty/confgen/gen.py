@@ -12,242 +12,208 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import xml.etree.ElementTree as ET
-from pathlib import Path
-from collections import defaultdict
+from pydantic import IPvAnyAddress
 
-from netty.arch import DeviceRole
-from netty.topogen.diagram import Node, Link, Group
-from netty.project import Device, Connection
-from netty.consts import DEFAULT_TOPOLOGY_PATH, PROJECT_CONFIG
-
-
-class TopoGen:
-    def __init__(self, corp_name: str, site_code: str) -> None:
-        self.mxfile = ET.Element(
-            "mxfile",
-            host="Electron",
-            agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/25.0.2 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36",
-        )
-        self.diagram = ET.SubElement(
-            self.mxfile,
-            "diagram",
-            id="diagram-1",
-            name=f"{corp_name.title()}-{site_code.title()}-Network Topology",
-        )
-        self.mxGraphModel = ET.SubElement(
-            self.diagram,
-            "mxGraphModel",
-            grid="1",
-            gridSize="10",
-            guides="1",
-            tooltips="1",
-            connect="1",
-            arrows="1",
-            fold="1",
-            page="1",
-            pageScale="1",
-            pageWidth="850",
-            pageHeight="1100",
-            math="0",
-            shadow="0",
-        )
-        self.root = ET.SubElement(self.mxGraphModel, "root")
-        self.mxCellId0 = ET.SubElement(self.root, "mxCell", id="0")
-        self.mxCellId1 = ET.SubElement(self.root, "mxCell", id="1", parent="0")  # type: ignore
-
-    def add_group(self, group: Group) -> None:
-        self.root.append(group.to_xml())
-
-    def add_groups(self, groups: list[Group]) -> None:
-        self.root.extend([group.to_xml() for group in groups])
-
-    def add_node(self, node: Node) -> None:
-        self.root.append(node.to_xml())
-
-    def add_nodes(self, nodes: list[Node]) -> None:
-        self.root.extend([node.to_xml() for node in nodes])
-
-    def add_link(self, link: Link) -> None:
-        self.root.extend([link.to_link_xml(), link.to_link_label_xml()])
-
-    def add_links(self, links: list[Link]) -> None:
-        for link in links:
-            self.add_link(link)
-
-    def display_xml(self) -> bytes:
-        return ET.tostring(self.mxfile)
-
-    def export_xml(self, path: Path) -> None:
-        with path.open("wb") as f:
-            tree = ET.ElementTree(self.mxfile)
-            tree.write(f)
-
-    def __repr__(self) -> str:
-        return str(self.display_xml())
+from netty.project import (
+    Device,
+    Subnet,
+    FixedIP,
+    PhysicalInterface,
+    Connection,
+    Project,
+)
+from netty.arch import (
+    DeviceRole,
+    ProductFamily,
+    generate_if_mode,
+    enable_if_port_fast,
+    enable_if_dhcp_snooping,
+    enable_if_dhcp_snooping_trust,
+    enable_if_netflow_export,
+)
+from netty.confgen.factory.switch_factory import SwitchFactory
+from netty.consts import PROJECT_CONFIG
+from netty.project.config import settings
+from netty.confgen.dispatcher import get_switch_factory
+from netty.confgen.utils import (
+    remove_duplicate_devices,
+    generate_default_gateway,
+    remove_stack_ports,
+)
+from netty.utils.netif import generate_port_channel_name
 
 
-def _lr_cord_calculator(count: int) -> dict[int, tuple[float, float, float, float]]:
-    """calculate left-to-right line cord, tuple[exitX,exitY,entryX,entryY]"""
-    coordinates = {}
-    if count == 1:
-        coordinates[1] = (1, 0.5, 0, 0.5)
-    elif count == 2:
-        coordinates[1] = (1, 0.25, 0, 0.25)
-        coordinates[2] = (1, 0.75, 0, 0.75)
-    elif count in (3, 4):
-        for i in range(1, count + 1):
-            coordinates[i] = (1, (i - 1) / (count - 1), 0, (i - 1) / (count - 1))
-    elif count in (5, 6):
-        for i in range(1, count + 1):
-            coordinates[i] = (1, (i - 1) / (count - 1), 0, (i - 1) / (count - 1))
-    return coordinates
-
-
-def _td_cord_calculator(count: int) -> dict[int, tuple[float, float, float, float]]:
-    """Calculate coordinates for top-down lines, tuple[exitX,exitY,entryX,entryY]"""
-    if count == 1:
-        return {1: (0.5, 1, 0.5, 0)}
-    coordinates = {}
-    for i in range(1, count + 1):
-        coordinates[i] = (
-            0.2 + (i - 1) / (count - 1) * 0.6,
-            1,
-            0.2 + (i - 1) / (count - 1) * 0.6,
-            0,
-        )
-    return coordinates
-
-
-def _dt_cord_calculator(count: int) -> dict[int, tuple[float, float, float, float]]:
-    """Calculate coordinates for down-to-top lines, tuple[exitX,exitY,entryX,entryY]"""
-    coordinates = {}
-    if count == 1:
-        coordinates[1] = (0.5, 0, 0.5, 1)
-    elif count in (2, 3, 4):
-        for i in range(1, count + 1):
-            coordinates[i] = (
-                0.2 + (i - 1) / (count - 1) * 0.6,
-                0,
-                0.2 + (i - 1) / (count - 1) * 0.6,
-                1,
-            )
-    return coordinates
-
-
-def _node_cord_calculator(
-    nodes: list[Node], x_offset: int = 150, y_offset: int = 200
-) -> list[Node]:
-    level_dict = defaultdict(list)
-    for node in nodes:
-        level_dict[node.device_role.node_level].append(node)
-    for level, level_nodes in level_dict.items():
-        num_of_nodes = len(level_nodes)
-        mid_point = (num_of_nodes - 1) // 2
-        left_offset = 0
-        right_offset = 0
-        for i, node in enumerate(level_nodes):
-            if i < mid_point:
-                node.x = left_offset - x_offset * (mid_point - i)
-            elif i > mid_point:
-                node.x = right_offset + x_offset * (i - mid_point)
-            else:
-                node.x = 0
-            node.y = level * y_offset
-    min_x = min([node.x for node in nodes])
-    if min_x < 0:
-        offset_x_plus = -min_x
-        for node in nodes:
-            node.x += offset_x_plus
-    return nodes
-
-
-def _unique_group(devices: list[Device]) -> list[Group]:
-    group_names = {
-        device.server_room
-        for device in devices
-        if device.server_room and device.device_role == DeviceRole.access_switch
+def __hostname_to_ip(devices: list[Device]) -> dict[str, IPvAnyAddress]:
+    hostname_to_ip: dict[str, IPvAnyAddress] = {
+        device.hostname: device.management_ip for device in devices
     }
-    return [Group(group_name) for group_name in group_names]
+    return hostname_to_ip
 
 
-def _group_by_devices(devices: list[Device]) -> list[Node]:
-    nodes = [
-        Node(hostname=device.hostname, device_role=device.device_role)
-        for device in devices
-    ]
-    # for device in devices:
-    #     if device.server_room and device.device_role == DeviceRole.access_switch:
-    #         nodes.append(
-    #             Node(
-    #                 hostname=device.hostname,
-    #                 device_role=device.device_role,
-    #                 group=device.server_room,
-    #             )
-    #         )
-    #     else:
-    #         nodes.append(Node(hostname=device.hostname, device_role=device.device_role))
-    return nodes
+def __ip_to_device(devices: list[Device]) -> dict[IPvAnyAddress, Device]:
+    ip_to_device: dict[IPvAnyAddress, Device] = {}
+    unique_devices = remove_duplicate_devices(devices)
+    for device in unique_devices:
+        ip_to_device[device.management_ip] = device
+    return ip_to_device
 
 
-def topology_generator(devices: list[Device], conns: list[Connection]) -> None:
-    hostname_device_mapping = {device.hostname: device for device in devices}
-    d2d_conns: dict[str, dict[str, int]] = defaultdict(dict)
-    # groups = _unique_group(devices)
-    nodes = _group_by_devices(devices)
-    nodes = _node_cord_calculator(nodes)
-    links = []
-    for conn in conns:
-        key = conn.local_hostname + conn.remote_hostname
-        if key not in d2d_conns:
-            d2d_conns[key]["total"] = 1
-            d2d_conns[key]["current"] = 1
-        else:
-            d2d_conns[key]["total"] += 1
-            d2d_conns[key]["current"] += 1
-    for conn in conns:
-        key = conn.local_hostname + conn.remote_hostname
-        total_count = d2d_conns[key]["total"]
-        current_count = d2d_conns[key]["current"]
-        local_device = hostname_device_mapping.get(conn.local_hostname)
-        remote_device = hostname_device_mapping.get(conn.remote_hostname)
-        if local_device and remote_device:
-            if (
-                local_device.device_role.node_level
-                == remote_device.device_role.node_level
-            ):
-                exitX, exitY, entryX, entryY = _lr_cord_calculator(total_count)[
-                    current_count
-                ]
-            elif (
-                local_device.device_role.node_level
-                > remote_device.device_role.node_level
-            ):
-                exitX, exitY, entryX, entryY = _dt_cord_calculator(total_count)[
-                    current_count
-                ]
-            else:
-                exitX, exitY, entryX, entryY = _td_cord_calculator(total_count)[
-                    current_count
-                ]
-            d2d_conns[key]["current"] -= 1
-            links.append(
-                Link(
-                    source=conn.local_hostname,
-                    target=conn.remote_hostname,
-                    label=f"{conn.local_interface_name}-{conn.remote_interface_name}",
-                    exitX=exitX,
-                    exitY=exitY,
-                    entryX=entryX,
-                    entryY=entryY,
-                    parent_id=conn.local_hostname,
-                    color=conn.if_type.interface_type_color,
+def __link_connections_to_device(
+    devices: list[Device], connections: list[Connection]
+) -> list[Device]:
+    ip_to_device_map = __ip_to_device(devices)
+    hostname_to_ip_map = __hostname_to_ip(devices)
+    if not connections:
+        return []
+    for connection in connections:
+        local_ip = hostname_to_ip_map.get(connection.local_hostname)
+        remote_ip = hostname_to_ip_map.get(connection.remote_hostname)
+        if local_ip is None:
+            raise ValueError(
+                f"Device with hostname {connection.local_hostname} not found"
+            )
+        local_device = ip_to_device_map[local_ip]
+        if remote_ip is not None:
+            remote_device = ip_to_device_map[remote_ip]
+            local_if_mode = generate_if_mode(
+                local_device.device_role, remote_device.device_role
+            )
+            remote_if_mode = generate_if_mode(
+                remote_device.device_role, local_device.device_role
+            )
+
+            local_device.interfaces.append(
+                PhysicalInterface(
+                    if_name=connection.local_interface_name,
+                    if_descr=connection.local_if_descr,
+                    port_channel_descr=generate_port_channel_name(
+                        connection.local_port_channel_descr,
+                        local_device.device_type.platform.port_channel_prefix(
+                            local_device.device_type.platform
+                        ),
+                    ),
+                    if_mode=local_if_mode,
+                    enable_netflow=enable_if_netflow_export(
+                        local_device.device_role,
+                        remote_device.device_role,
+                        bool(connection.local_port_channel_id),
+                    ),
+                    port_channel_id=connection.local_port_channel_id,
+                    dhcp_snooping_enable=enable_if_dhcp_snooping(
+                        local_device.device_role, local_if_mode
+                    ),
+                    dhcp_snooping_trust=enable_if_dhcp_snooping_trust(
+                        local_device.device_role, remote_device.device_role
+                    ),
+                    port_fast=enable_if_port_fast(
+                        local_device.device_role, local_if_mode
+                    ),
                 )
             )
-    top = TopoGen(
-        corp_name=PROJECT_CONFIG.corp_name, site_code=PROJECT_CONFIG.site_code
+
+            remote_device.interfaces.append(
+                PhysicalInterface(
+                    if_name=connection.remote_interface_name,
+                    if_descr=connection.remote_if_descr,
+                    port_channel_descr=generate_port_channel_name(
+                        connection.remote_port_channel_descr,
+                        remote_device.device_type.platform.port_channel_prefix(
+                            remote_device.device_type.platform
+                        ),
+                    ),
+                    if_mode=remote_if_mode,
+                    enable_netflow=enable_if_netflow_export(
+                        remote_device.device_role,
+                        local_device.device_role,
+                        bool(connection.remote_port_channel_id),
+                    ),
+                    port_channel_id=connection.remote_port_channel_id,
+                    dhcp_snooping_enable=enable_if_dhcp_snooping(
+                        remote_device.device_role, remote_if_mode
+                    ),
+                    dhcp_snooping_trust=enable_if_dhcp_snooping_trust(
+                        remote_device.device_role, local_device.device_role
+                    ),
+                    port_fast=enable_if_port_fast(
+                        remote_device.device_role, remote_if_mode
+                    ),
+                )
+            )
+        elif local_device.device_role in (
+            DeviceRole.firewall,
+            DeviceRole.internet_switch,
+        ):
+            local_device.interfaces.append(
+                PhysicalInterface(
+                    if_name=connection.local_interface_name,
+                    if_descr=connection.local_if_descr,
+                    port_channel_descr=generate_port_channel_name(
+                        connection.local_port_channel_descr,
+                        local_device.device_type.platform.port_channel_prefix(
+                            local_device.device_type.platform
+                        ),
+                    ),
+                    if_mode="access",
+                    enable_netflow=False,  # Assuming no netflow for standalone firewall interface
+                    port_channel_id=connection.local_port_channel_id,
+                    dhcp_snooping_enable=False,  # Assuming no DHCP snooping for standalone firewall interface
+                    dhcp_snooping_trust=False,  # Assuming no DHCP snooping trust for standalone firewall interface
+                    port_fast=False,  # Assuming no port fast for standalone firewall interface
+                )
+            )
+        else:
+            raise ValueError(
+                f"Remote device with hostname {connection.remote_hostname} not found"
+            )
+    return list(ip_to_device_map.values())
+
+
+def switch_config_generator(
+    factory: type[SwitchFactory],
+    device: Device,
+    subnets: list[Subnet] | None = None,
+    fixed_ips: list[FixedIP] | None = None,
+) -> None:
+    new_device = factory(
+        site_code=PROJECT_CONFIG.site_code,
+        device=device,
+        baseline_config=settings.baseline_config,
+        snmp_config=settings.snmp_config,
+        system_config=settings.system_config,
+        netflow_config=settings.netflow_config,
+        aaa_config=settings.aaa_config,
+        subnets=subnets,
+        fixed_ips=fixed_ips,
     )
-    # top.add_groups(groups)
-    top.add_nodes(nodes)
-    top.add_links(links)
-    top.export_xml(Path(DEFAULT_TOPOLOGY_PATH))
+    return new_device.generate_config_file()
+
+
+def _switch_gen(
+    device: Device,
+    subnets: list[Subnet] | None = None,
+    fixed_ips: list[FixedIP] | None = None,
+) -> None:
+    if "switch" in device.device_role.lower():
+        factory = get_switch_factory(device)
+        if not factory:
+            return None
+        return switch_config_generator(factory, device, subnets, fixed_ips)
+    return None
+
+
+def _firewall_gen(device: Device, project_info: Project): ...
+
+
+def config_generator(devices: list[Device], connections: list[Connection], subnets: list[Subnet], fix_ips: list[FixedIP], project_info: Project) -> None:
+    if connections:
+        connections, devices = remove_stack_ports(devices, connections)
+        devices = __link_connections_to_device(devices, connections)
+    for device in devices:
+        if not device.default_gateway:
+            device.default_gateway = generate_default_gateway(devices, device)
+        if device.device_type.product_family == ProductFamily.switch:
+            _switch_gen(device, subnets, fix_ips)
+        elif device.device_type.product_family == ProductFamily.firewall:
+            _firewall_gen(device, project_info=project_info)
+        else:
+            _switch_gen(device)

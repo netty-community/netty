@@ -92,7 +92,10 @@ def _lr_cord_calculator(count: int) -> dict[int, tuple[float, float, float, floa
     coordinates = {}
     if count == 1:
         coordinates[1] = (1, 0.5, 0, 0.5)
-    elif count in (2, 3, 4):
+    elif count == 2:
+        coordinates[1] = (1, 0.25, 0, 0.25)
+        coordinates[2] = (1, 0.75, 0, 0.75)
+    elif count in (3, 4):
         for i in range(1, count + 1):
             coordinates[i] = (1, (i - 1) / (count - 1), 0, (i - 1) / (count - 1))
     elif count in (5, 6):
