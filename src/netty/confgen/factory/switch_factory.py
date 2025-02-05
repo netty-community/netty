@@ -236,26 +236,25 @@ class SwitchFactory:
         if not self.device.interfaces:
             return []
         unique_port_channels = []
+        results = []
         for interface in self.device.interfaces:
-            if (
-                interface.port_channel_id is not None
-                and interface.port_channel_id not in unique_port_channels
-            ):
+            if interface.port_channel_id is None:
+                continue
+            if interface.port_channel_id not in unique_port_channels:
                 unique_port_channels.append(interface.port_channel_id)
-        return [
-            PortChannel(
-                port_channel_id=interface.port_channel_id,
-                if_mode=interface.if_mode,
-                if_descr=interface.port_channel_descr,
-                dhcp_snooping_enable=interface.dhcp_snooping_enable,
-                dhcp_snooping_trust=interface.dhcp_snooping_trust,
-                enable_netflow=interface.enable_netflow,
-                vlan_id=interface.vlan_id,
-            )
-            for interface in self.device.interfaces
-            if interface.port_channel_id
-            and interface.port_channel_id in unique_port_channels
-        ]
+            else:
+                results.append(
+                    PortChannel(
+                        port_channel_id=interface.port_channel_id,
+                        if_mode=interface.if_mode,
+                        if_descr=interface.port_channel_descr,
+                        dhcp_snooping_enable=interface.dhcp_snooping_enable,
+                        dhcp_snooping_trust=interface.dhcp_snooping_trust,
+                        enable_netflow=interface.enable_netflow,
+                        vlan_id=interface.vlan_id,
+                    )
+                )
+        return results
 
     def enrich_data(self) -> Switch:
         raise NotImplementedError
