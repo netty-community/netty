@@ -56,6 +56,7 @@ class HuaweiSwitch(SwitchFactory):
         vlans = self.get_vlan_list()
         vlan_ifs = self.get_vlan_if_list()
         port_channels = self.get_port_channel_list()
+        l3_interface = self.get_l3_interface_list()
 
         switch = Switch(
             hostname=self.device.hostname,
@@ -74,6 +75,8 @@ class HuaweiSwitch(SwitchFactory):
             vlan_ifs=vlan_ifs,
             port_channels=port_channels,
             default_gateway=self.device.default_gateway,
+            physical_ifs=self.device.interfaces,
+            routed_ifs=l3_interface,
         )
         switch.flow_type = self.__flow_type()
         switch.management_ip = self.__management_ip(vlan_ifs)

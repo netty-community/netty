@@ -99,6 +99,7 @@ class Switch:
     stp_config: "Stp | None" = None
     vlans: list["Vlan"] | None = None
     vlan_ifs: list["VlanIf"] | None = None
+    routed_ifs: list["PhysicalInterface"] | None = None
     physical_ifs: list["PhysicalInterface"] | None = None
     port_channels: list["PortChannel"] | None = None
     vrfs: list["Vrf"] | None = None
@@ -224,13 +225,11 @@ class SwitchFactory:
                     vrf_name=subnet.vrf_name,
                 )
                 for subnet in self.subnets
-                if subnet.interface_name and not subnet.vlan_id
+                if subnet.interface_name and not subnet.vlan_id and subnet.if_addr
             ]
         else:
             interfaces = []
-        if not self.device.interfaces:
-            return interfaces
-        return interfaces + self.device.interfaces
+        return interfaces
 
     def get_port_channel_list(self) -> list["PortChannel"]:
         if not self.device.interfaces:

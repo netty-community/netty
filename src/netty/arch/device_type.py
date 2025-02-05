@@ -20,7 +20,9 @@ from netty.arch.platform import Platform
 
 
 class InterfaceType(StrEnum):
+    base_100_tx = "100base-tx"
     base_1000_t = "1000base-t"
+    base_5g_t = "5gbase-t"
     base_10g_t = "10gbase-t"
     base_1000_x_sfp = "1000base-x-sfp"
     base_10g_x_sfpp = "10gbase-x-sfpp"
@@ -33,7 +35,9 @@ class InterfaceType(StrEnum):
     @property
     def interface_type_color(self) -> str:
         mappings = {
+            InterfaceType.base_100_tx: "#6cc0e5",
             InterfaceType.base_1000_t: "#6cc0e5",
+            InterfaceType.base_5g_t: "#6cc0e5",
             InterfaceType.base_10g_t: "#6cc0e5",
             InterfaceType.base_1000_x_sfp: "#fbc93d",
             InterfaceType.base_10g_x_sfpp: "#fbc93d",

@@ -1,6 +1,6 @@
 ---
 platform: aruba_os
-name: Aruba 7205
+name: Aruba 7210
 u_height: 1
 power_consumption: 40
 poe_support: true
@@ -11,9 +11,9 @@ interfaces:
   - name: gigabitethernet 0/0/1
     type: 1000base-t
   - name: gigabitethernet 0/0/2
-    type: 1000base-t
+    type: 10gbase-x-sfpp
   - name: gigabitethernet 0/0/3
-    type: 1000base-t
+    type: 10gbase-x-sfpp
   - name: gigabitethernet 0/0/4
     type: 10gbase-x-sfpp
   - name: gigabitethernet 0/0/5

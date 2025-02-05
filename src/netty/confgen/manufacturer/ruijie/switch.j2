@@ -120,10 +120,9 @@ aaa accounting network default start-stop group accounting
 aaa authorization network default group dot1x
 aaa authentication dot1x default group dot1x
     {% for server in switch.aaa_config.servers %}
-radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port
-{{switch.aaa_config.acct_port}} test username {{switch.aaa_config.username}} key {{switch.aaa_config.password}}
+radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} test username {{switch.aaa_config.username}} key {{switch.aaa_config.password}}
 radius-server dead-criteria tries 5
-ip radius source-interface VLAN {{switch.management_vlan}}
+ip radius source-interface VLAN {{switch.system_config.management_vlan}}
     {% endfor %}
 aaa group server radius dot1x
     {% for server in switch.aaa_config.servers %}
@@ -137,8 +136,8 @@ server {{server.compressed}} auth_port {{switch.aaa_config.auth_port}} acct-port
 
 {%if switch.snmp_config.snmp_source_address-%}
 ip access-list standard snmp-acl
-    {%for index, addr in enumerate(switch.snmp_config.snmp_source_address)%}
-    {{(index+1)*10}} permit {{addr.network_address.compressed}} {{netmask_to_wildcard_mask(address.netmask.compressed)}}
+    {%for addr in switch.snmp_config.snmp_source_address%}
+    {{(loop.index+1)*10}} permit {{addr.network_address.compressed}} {{netmask_to_wildcard_mask(address.netmask.compressed)}}
     {%endfor%}
 {%-endif%}
 {% if switch.snmp_config.snmp_version == "v2c"%}
@@ -158,20 +157,20 @@ no snmp-server enable traps
 {%else%}
 snmp-server enable traps
 snmp-server host {{switch.snmp_config.snmp_trap_server.compressed}} traps {{switch.snmp_config.snmp_trap_password}}
-snmp-server trap-source VLAN {{switch.management_vlan}}
+snmp-server trap-source VLAN {{switch.system_config.management_vlan}}
 {%endif%}
 {%-endif%}
 
 {%if switch.system_config.syslog_server-%}
 logging facility local2
 logging origin-id hostname
-logging source interface VLAN {{switch.management_vlan}}
+logging source interface VLAN {{switch.system_config.management_vlan}}
 logging server {{switch.system_config.syslog_server}} udp-port {{switch.system_config.syslog_udp_port}}
 {%-endif%}
 
 {%if switch.baseline_config.enable_netflow and switch.netflow_config -%}
 sflow enable
-sflow agent interface VLAN {{switch.management_vlan}}
+sflow agent interface VLAN {{switch.system_config.management_vlan}}
 sflow collector 1 destination {{switch.netflow_config.flow_export_address}} {{switch.netflow_config.sflow_default_port}}
 {%endif%}
 {%for if_name in switch.netflow_config.export_flow_interfaces%}
@@ -219,8 +218,8 @@ interface VLAN {{vlan_if.vlan_id}}
 {%endfor%}
 {%-endif%}
 
-{%if switch.physical_ifs-%}
-{%for interface in switch.physical_ifs%}
+{%if switch.routed_ifs-%}
+{%for interface in switch.routed_ifs%}
 interface {{interface.if_name}}
     no switchport
     ip address {{interface.if_addr.ip.compressed}} {{interface.if_addr.netmask}}
@@ -255,8 +254,8 @@ interface AggregatePort {{port.port_channel_id}}
 {%endfor%}
 {%-endif%}
 
-{% if switch.interfaces -%}
-{%for interface in switch.interfaces%}
+{% if switch.physical_ifs -%}
+{%for interface in switch.physical_ifs%}
 interface {{interface.if_name}}
 {%if interface.if_descr%}
     description {{interface.if_descr}}

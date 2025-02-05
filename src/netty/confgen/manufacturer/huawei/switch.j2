@@ -93,8 +93,8 @@ ssh user {{switch.system_config.management_username}} service-type stelnet
 {% if switch.aaa_config and switch.aaa_config.servers -%}
     {%if switch.aaa_config.aaa_protocol == "radius"%}
 radius-server template rd
-        {%for index, server in enumerate(switch.aaa_config.servers)%}
-    radius-server authentication {{server.compressed}} {{switch.aaa_config.auth_port}} weight {{(index+1)*40}}
+        {%for server in switch.aaa_config.servers%}
+    radius-server authentication {{server.compressed}} {{switch.aaa_config.auth_port}} weight {{(loop.index+1)*40}}
         {%endfor%}
     radius-server algorithm master-backup
     radius-server testuser {{switch.aaa_config.username}} password cipher {{switch.aaa_config.password}}
@@ -172,8 +172,8 @@ undo authentication pre-authen-access enable
 {%if switch.snmp_config.snmp_source_address-%}
 acl name snmp-acl 2999
     description /**SNMP RO authorized servers/
-    {%for index, addr in enumerate(switch.snmp_config.snmp_source_address)%}
-    rule {{(index+1)*10}} permit source {{addr.network_address.compressed}} {{address.netmask.compressed}}
+    {%for addr in switch.snmp_config.snmp_source_address%}
+    rule {{(loop.index+1)*10}} permit source {{addr.network_address.compressed}} {{address.netmask.compressed}}
     {%endfor%}
     rule 1000 deny logging
 {%-endif%}
@@ -198,13 +198,13 @@ snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} acl 2999
 {%if switch.snmp_config.enable_trap-%}
 snmp-agent enable traps
 snmp-agent host {{switch.snmp_config.snmp_trap_server.compressed}} traps {{switch.snmp_config.snmp_trap_password}}
-snmp-server trap-source Vlanif {{switch.management_vlan}}
+snmp-server trap-source Vlanif {{switch.system_config.management_vlan}}
 {%-endif%}
 
 {%if switch.system_config.syslog_server-%}
 info-center source default channel 3 trap level informational
 info-center channel 2 name logser1
-info-center loghost source Vlanif {{switch.management_vlan}}
+info-center loghost source Vlanif {{switch.system_config.management_vlan}}
 info-center loghost {{switch.system_config.syslog_server}} facility local2 local-time
 info-center logbuffer size 1024
 info-center timestamp debugging format-date precision-time tenth-second

@@ -1,14 +1,14 @@
 ---
 platform: aruba_os
-name: AP-535
+name: AP-555
 u_height: 1
 power_consumption: 40
 poe_support: true
 product_family: ap
 interfaces:
   - name: eth0
-    type: 5gbase-t
+    type: 1000base-t
   - name: eth1
-    type: 5gbase-t
+    type: 1000base-t
 uplink_interfaces:
   - eth0

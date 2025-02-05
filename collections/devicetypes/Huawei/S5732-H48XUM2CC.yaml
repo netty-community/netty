@@ -102,19 +102,19 @@ interfaces:
     type: 1000base-x-sfp
   - name: G1/0/48
     type: 1000base-x-sfp
-  - name: Xg0/49
+  - name: Xg1/0/49
     type: 10gbase-x-sfpp
-  - name: Xg0/50
+  - name: Xg1/0/50
     type: 10gbase-x-sfpp
-  - name: Xg0/51
+  - name: Xg1/0/51
     type: 10gbase-x-sfpp
-  - name: Xg0/52
+  - name: Xg1/0/52
     type: 10gbase-x-sfpp
 stack_interfaces:
-  - Te1/0/51
-  - Te1/0/52
+  - Xg1/0/51
+  - Xg1/0/52
 uplink_interfaces:
-  - G1/0/49
-  - G1/0/50
+  - Xg1/0/49
+  - Xg1/0/50
 mad_interface: G1/0/48
-oob_interface: Mg0/0
+oob_interface: Meth0/0/1

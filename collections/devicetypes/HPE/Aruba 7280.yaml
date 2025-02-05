@@ -1,0 +1,42 @@
+---
+platform: aruba_os
+name: Aruba 7240
+u_height: 1
+power_consumption: 40
+poe_support: true
+product_family: wlc
+interfaces:
+  - name: gigabitethernet 0/0/0
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/1
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/2
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/3
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/4
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/6
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/7
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/8
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/9
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/10
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/11
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/12
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/13
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/14
+    type: 10gbase-x-sfpp
+  - name: gigabitethernet 0/0/15
+    type: 10gbase-x-sfpp
+uplink_interfaces:
+  - gigabitethernet 0/0/14
+  - gigabitethernet 0/0/15
+oob_interface: mgmt

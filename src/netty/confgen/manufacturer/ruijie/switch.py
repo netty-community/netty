@@ -41,6 +41,7 @@ class RuijieSwitch(SwitchFactory):
         vlans = self.get_vlan_list()
         vlan_ifs = self.get_vlan_if_list()
         port_channels = self.get_port_channel_list()
+        l3_ifs = self.get_l3_interface_list()
 
         return Switch(
             hostname=self.device.hostname,
@@ -59,6 +60,8 @@ class RuijieSwitch(SwitchFactory):
             vlan_ifs=vlan_ifs,
             port_channels=port_channels,
             default_gateway=self.device.default_gateway,
+            physical_ifs=self.device.interfaces,
+            routed_ifs=l3_ifs,
         )
 
     def load_jinja2_template(self) -> Template:

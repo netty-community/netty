@@ -1,0 +1,84 @@
+---
+platform: huawei_vrp
+name: S6730-H28Y4C
+u_height: 1
+power_consumption: 300
+poe_support: true
+product_family: switch
+interfaces:
+  - name: MEth0/0/1
+    type: 100base-tx
+  - name: 25GE0/0/1
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/2
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/3
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/4
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/5
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/6
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/7
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/8
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/9
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/10
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/11
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/12
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/13
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/14
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/15
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/16
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/17
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/18
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/19
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/20
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/21
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/22
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/23
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/24
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/25
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/26
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/27
+    type: 25gbase-x-sfp28
+  - name: 25GE0/0/28
+    type: 25gbase-x-sfp28
+  - name: 100GE0/0/1
+    type: 100gbase-x-qsfp28
+  - name: 100GE0/0/2
+    type: 100gbase-x-qsfp28
+  - name: 100GE0/0/3
+    type: 100gbase-x-qsfp28
+  - name: 100GE0/0/4
+    type: 100gbase-x-qsfp28
+stack_interfaces:
+  - XGigabitEthernet0/0/28
+  - XGigabitEthernet0/0/27
+uplink_interfaces:
+  - XGigabitEthernet0/0/25
+  - XGigabitEthernet0/0/24
+  - 100GE0/0/3
+  - 100GE0/0/4
+mad_interface: XGigabitEthernet0/0/26
+oob_interface: MEth0/0/1

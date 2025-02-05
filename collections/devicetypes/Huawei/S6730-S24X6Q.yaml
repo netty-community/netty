@@ -1,0 +1,80 @@
+---
+platform: huawei_vrp
+name: S6730-S24X6Q
+u_height: 1
+power_consumption: 300
+poe_support: true
+product_family: switch
+interfaces:
+  - name: MEth0/0/1
+    type: 100base-tx
+  - name: XGigabitEthernet0/0/1
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/2
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/3
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/4
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/5
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/6
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/7
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/8
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/9
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/10
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/11
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/12
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/13
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/14
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/15
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/16
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/17
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/18
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/19
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/20
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/21
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/22
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/23
+    type: 10gbase-x-sfpp
+  - name: XGigabitEthernet0/0/24
+    type: 10gbase-x-sfpp
+  - name: 40GE0/0/1
+    type: 40gbase-x-qsfpp
+  - name: 40GE0/0/2
+    type: 40gbase-x-qsfpp
+  - name: 40GE0/0/3
+    type: 40gbase-x-qsfpp
+  - name: 40GE0/0/4
+    type: 40gbase-x-qsfpp
+  - name: 40GE0/0/5
+    type: 40gbase-x-qsfpp
+  - name: 40GE0/0/6
+    type: 40gbase-x-qsfpp
+stack_interfaces:
+  - XGigabitEthernet0/0/23
+  - XGigabitEthernet0/0/24
+uplink_interfaces:
+  - XGigabitEthernet0/0/22
+  - XGigabitEthernet0/0/21
+  - 40GE0/0/5
+  - 40GE0/0/6
+mad_interface: XGigabitEthernet0/0/22
+oob_interface: MEth0/0/1

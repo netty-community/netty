@@ -1,6 +1,6 @@
 ---
 platform: aruba_os
-name: Aruba 7205
+name: Aruba 7030
 u_height: 1
 power_consumption: 40
 poe_support: true
@@ -15,10 +15,14 @@ interfaces:
   - name: gigabitethernet 0/0/3
     type: 1000base-t
   - name: gigabitethernet 0/0/4
-    type: 10gbase-x-sfpp
+    type: 1000base-t
   - name: gigabitethernet 0/0/5
-    type: 10gbase-x-sfpp
+    type: 1000base-t
+  - name: gigabitethernet 0/0/6
+    type: 1000base-t
+  - name: gigabitethernet 0/0/7
+    type: 1000base-t
 uplink_interfaces:
-  - gigabitethernet 0/0/4
-  - gigabitethernet 0/0/5
+  - gigabitethernet 0/0/1
+  - gigabitethernet 0/0/2
 oob_interface: mgmt
