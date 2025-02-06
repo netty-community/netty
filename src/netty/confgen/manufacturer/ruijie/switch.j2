@@ -59,7 +59,8 @@ no enable secret
 ntp service disable
 no enable service web-server
 interface VLAN 1
-no ip address
+    no ip address
+    shutdown
 
 hostname {{switch.hostname}}
 banner login "
@@ -120,17 +121,21 @@ aaa accounting network default start-stop group accounting
 aaa authorization network default group dot1x
 aaa authentication dot1x default group dot1x
     {% for server in switch.aaa_config.servers %}
+        {%if not switch.aaa_config.username%}
+radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} key {{switch.aaa_config.password}}
+        {%else%}
 radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} test username {{switch.aaa_config.username}} key {{switch.aaa_config.password}}
+        {%endif%}
+    {% endfor %}
 radius-server dead-criteria tries 5
 ip radius source-interface VLAN {{switch.system_config.management_vlan}}
-    {% endfor %}
 aaa group server radius dot1x
     {% for server in switch.aaa_config.servers %}
-server {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
+    server {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
     {% endfor %}
 aaa group server radius accounting
     {% for server in switch.aaa_config.servers %}
-server {{server.compressed}} auth_port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
+    server {{server.compressed}} auth_port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
     {%endfor%}
 {%-endif%}
 
