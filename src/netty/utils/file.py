@@ -14,6 +14,8 @@ limitations under the License.
 
 from pathlib import Path
 
+from openpyxl import load_workbook
+
 from jinja2 import Environment, FileSystemLoader, Template
 
 
@@ -25,3 +27,12 @@ def load_jinja2_template(template_path: Path, template: str) -> Template:
     )
     j2_template = env.get_template(template)
     return j2_template
+
+
+def get_all_device_types(path: Path) -> list[str]:
+    file_list = []
+    for file in Path(path).rglob('*'): 
+        if file.is_file() and file.suffix in ('.yaml', '.yml'):
+            file_list.append(file.name.split('.')[0]) 
+
+    return file_list

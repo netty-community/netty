@@ -156,8 +156,8 @@ class AAAConfig(BaseModel):
     servers: list[IPvAnyAddress]
     auth_port: int = Field(default=1812)
     acct_port: int = Field(default=1813)
-    username: str
-    password: str
+    username: str | None = Field(default=None, description="aaa test username")
+    password: str = Field(description="the auth/acct key")
     auth_vlan: int = Field(default=200)
     escape_vlan: int = Field(default=300)
 

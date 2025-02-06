@@ -1,6 +1,6 @@
 ---
 platform: aruba_os
-name: Aruba 7210
+name: Aruba-7210
 u_height: 1
 power_consumption: 40
 poe_support: true

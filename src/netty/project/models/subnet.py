@@ -39,7 +39,7 @@ class Subnet(BaseModel):
         description="The vlan name/interface description of the subnet",
     )
     interface_name: str | None = Field(
-        ..., alias="InterfaceName", description="The interface name of the subnet"
+        default=None, alias="InterfaceName", description="The interface name of the subnet"
     )
     if_addr: IPvAnyInterface = Field(
         ..., alias="IfAddress", description="The if_addr of the subnet"
@@ -52,7 +52,7 @@ class Subnet(BaseModel):
         description="Whether to enable dhcp pool, disable by default",
     )
     dhcp_network: IPvAnyNetwork | None = Field(
-        ..., alias="DHCPNetwork", description="The network of the dhcp range"
+        default=None, alias="DHCPNetwork", description="The network of the dhcp range"
     )
     dhcp_range_start: IPvAnyAddress | None = Field(
         default=None, alias="DHCPRangeStart", description="The start of the dhcp range"

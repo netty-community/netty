@@ -1,6 +1,6 @@
 ---
 platform: aruba_os
-name: AP-365
+name: Aruba-AP-555
 u_height: 1
 power_consumption: 40
 poe_support: true

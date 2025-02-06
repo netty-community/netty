@@ -114,9 +114,37 @@ def interface_type_mapping(if_type: str) -> InterfaceType:
         "1G SM Fiber": InterfaceType.base_1000_x_sfp,
         "40G MM Fiber": InterfaceType.base_40g_x_qsfpp,
         "40G SM Fiber": InterfaceType.base_40g_x_qsfpp,
+        "100G SM Fiber": InterfaceType.base_100g_x_qspf28,
         "100G MM Fiber": InterfaceType.base_100g_x_qspf28,
     }
     if if_type not in mappings:
         msg = f"Invalid interface type, InterfaceType {if_type} is not defined"
         raise ValueError(msg)
     return mappings[if_type]
+
+def get_interface_type_lists(region: str) -> list[str]:
+    if region == "CN":
+        return [
+            "10G多模光纤",
+            "1G多模光纤",
+            "CAT6E网线",
+            "堆叠线",
+            "10G单模光纤",
+            "1G单模光纤",
+            "40G多模光纤",
+            "40G单模光纤",
+            "100G单模光纤",
+            "100G多模光纤",
+        ]
+    return [
+        "10G MM Fiber",
+        "1G MM Fiber",
+        "CAT6E Cable",
+        "Stack Cable",
+        "10G SM Fiber",
+        "1G SM Fiber",
+        "40G MM Fiber",
+        "40G SM Fiber",
+        "100G SM Fiber",
+        "100G MM Fiber",    
+    ]

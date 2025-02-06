@@ -17,11 +17,8 @@ from .models.connection import Connection
 from .models.project import Project, WanNetwork, LanNetwork
 from .models.subnet import Subnet, FixedIP
 from .file_parser import (
-    parse_connections,
-    parse_subnets,
-    parse_devices,
-    parse_fix_ips,
     parse_project_info,
+    parse_network_data,
 )
 from .models.policy import WebFilter, UrlFilterEntry
 
@@ -37,9 +34,6 @@ __all__ = (
     "LanNetwork",
     "WebFilter",
     "UrlFilterEntry",
-    "parse_connections",
-    "parse_subnets",
-    "parse_devices",
-    "parse_fix_ips",
     "parse_project_info",
+    "parse_network_data"
 )

@@ -46,23 +46,27 @@ class Connection(BaseModel):
     @computed_field
     @property
     def local_if_descr(self) -> str:
-        return f"to_{self.remote_hostname}_{self.remote_interface_name}"
+        return f"to_{self.remote_hostname}_{self.remote_interface_name}".replace(" ", "")
 
     @computed_field
     @property
     def remote_if_descr(self) -> str:
-        return f"to_{self.local_hostname}_{self.local_interface_name}"
+        return f"to_{self.local_hostname}_{self.local_interface_name}".replace(" ", "")
 
     @computed_field
     @property
     def local_port_channel_descr(self) -> str:
         if self.remote_port_channel_id:
-            return f"to_{self.remote_hostname}_{self.remote_port_channel_id}"
+            return f"to_{self.remote_hostname}_{self.remote_port_channel_id}".replace(
+                " ", ""
+            )
         return ""
 
     @computed_field
     @property
     def remote_port_channel_descr(self) -> str:
         if self.local_port_channel_id:
-            return f"to_{self.local_hostname}_{self.local_port_channel_id}"
+            return f"to_{self.local_hostname}_{self.local_port_channel_id}".replace(
+                " ", ""
+            )
         return ""

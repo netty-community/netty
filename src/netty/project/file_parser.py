@@ -16,15 +16,17 @@ import csv
 from pathlib import Path
 import logging
 from collections import defaultdict
+from typing import TypeVar
 
+from pydantic import BaseModel
+from openpyxl import load_workbook
+from openpyxl.workbook import Workbook
 import yaml
 from pydantic import IPvAnyAddress 
 from netty.consts import (
-    DEFAULT_DEVICES_PATH,
-    DEFAULT_FIX_IPS_PATH,
-    DEFAULT_CONNECTIONS_PATH,
     DEFAULT_PROJECT_INFO_PATH,
-    DEFAULT_SUBNETS_PATH,
+    DEFAULT_NETWORK_TEMPLATE_PATH,
+    TemplateName
 )
 from netty.project import Device, Connection, FixedIP, Subnet, Project
 from netty.utils.netif import match_interface_by_port_id, process_interface_name
@@ -32,50 +34,40 @@ from netty.arch import DeviceRole, InterfaceType
 
 logger = logging.getLogger(__name__)
 
-def parse_subnets(subnets_path: Path = Path(DEFAULT_SUBNETS_PATH)) -> list[Subnet]:
-    """Parse the subnets configuration from the given path."""
-    logging.info("[parse_subnets] Parsing subnets from %s", subnets_path)
-    with subnets_path.open(encoding="utf-8-sig") as file:
-        reader = csv.DictReader(file)
-        results= [
-            Subnet.model_validate(
-                {key: value if value else None for key, value in row.items()}
-            )
-            for row in reader
-        ]
-        logging.info(f"[parse_subnets] Done parsing subnets from {subnets_path}, got {len(results)} subnets")
-        return results
+T = TypeVar("T", bound=BaseModel)
+
+def read_excel_to_models(workbook: Workbook, sheet_name: str, model: type[T]) -> list[T]:
+    """
+    Reads data from a specified Excel sheet and maps it to a list of model instances.
+
+    Args:
+        workbook (Workbook): An openpyxl Workbook object representing the Excel file.
+        sheet_name (str): The name of the sheet to read data from.
+        model (type[T]): The Pydantic model class to map the data to.
+
+    Returns:
+        list[T]: A list of instances of the specified model containing the data from the sheet.
+    """
+    model_instances: list[T] = []
+    for sheet in workbook:
+        if sheet.title != sheet_name:
+            continue
+        headers = [cell.value for cell in sheet[1]]
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            row_data = dict(zip(headers, row))
+            model_instance = model.model_validate({key: str(value) for key, value in row_data.items() if value is not None})
+            model_instances.append(model_instance)
+    return model_instances
+
+def parse_network_data(path: Path=Path(DEFAULT_NETWORK_TEMPLATE_PATH))->tuple[list[Device], list[Connection], list[Subnet], list[FixedIP]]:
+    wb = load_workbook(path)
+    devices = read_excel_to_models(wb, TemplateName.hardware_sheet, Device)
+    conns = read_excel_to_models(wb, TemplateName.connection_sheet, Connection)
+    subnets = read_excel_to_models(wb, TemplateName.subnet_sheet, Subnet)
+    fix_ips = read_excel_to_models(wb, TemplateName.fix_ip_sheet, FixedIP)
+    return devices, conns, subnets, fix_ips
 
 
-def parse_devices(path: Path = Path(DEFAULT_DEVICES_PATH)) -> list[Device]:
-    """Parse the devices configuration from the given path."""
-    logging.info("[parse_devices] Parsing devices from %s", path)
-    with Path.open(path, encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        results= [
-            Device.model_validate(
-                {key: value if value else None for key, value in row.items()}
-            )
-            for row in reader
-        ]
-        logging.info(f"[parse_devices] Done parsing devices from {path}, got {len(results)} devices")
-        return results
-
-
-def parse_connections(
-    path: Path = Path(DEFAULT_CONNECTIONS_PATH),
-) -> list[Connection]:
-    logging.info("[parse_connections] Parsing connections from %s", path)
-    with Path.open(path, encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        results= [
-            Connection.model_validate(
-                {key: value if value else None for key, value in row.items()}
-            )
-            for row in reader
-        ]
-        logging.info(f"[parse_connections] Done parsing connections from {path}, got {len(results)} connections")
-        return results
 
 def enrich_devices_and_connections(
     devices: list[Device], conns: list[Connection]
@@ -136,11 +128,3 @@ def parse_project_info(path: Path = Path(DEFAULT_PROJECT_INFO_PATH)) -> Project:
         logging.info(f"[parse_project_info] Done parsing project info from {path}")
         return result
 
-
-def parse_fix_ips(path: Path = Path(DEFAULT_FIX_IPS_PATH)) -> list[FixedIP]:
-    logging.info("[parse_fix_ips] Parsing fix ips from %s", path)
-    with Path.open(path, encoding="utf-8-sig") as f:
-        reader = csv.DictReader(f)
-        results = [FixedIP.model_validate(row) for row in reader]
-        logging.info(f"[parse_fix_ips] Done parsing fix ips from {path}, got {len(results)} fix ips")
-        return results

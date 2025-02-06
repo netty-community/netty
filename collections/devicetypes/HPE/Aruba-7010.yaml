@@ -1,0 +1,48 @@
+---
+platform: aruba_os
+name: Aruba-7010
+u_height: 1
+power_consumption: 40
+poe_support: true
+product_family: wlc
+interfaces:
+  - name: gigabitethernet 0/0/0
+    type: 1000base-t
+  - name: gigabitethernet 0/0/1
+    type: 1000base-t
+  - name: gigabitethernet 0/0/2
+    type: 1000base-t
+  - name: gigabitethernet 0/0/3
+    type: 1000base-t
+  - name: gigabitethernet 0/0/4
+    type: 1000base-t
+  - name: gigabitethernet 0/0/5
+    type: 1000base-t
+  - name: gigabitethernet 0/0/6
+    type: 1000base-t
+  - name: gigabitethernet 0/0/7
+    type: 1000base-t
+  - name: gigabitethernet 0/0/8
+    type: 1000base-t
+  - name: gigabitethernet 0/0/9
+    type: 1000base-t
+  - name: gigabitethernet 0/0/10
+    type: 1000base-t
+  - name: gigabitethernet 0/0/11
+    type: 1000base-t
+  - name: gigabitethernet 0/0/12
+    type: 1000base-t
+  - name: gigabitethernet 0/0/13
+    type: 1000base-t
+  - name: gigabitethernet 0/0/14
+    type: 1000base-t
+  - name: gigabitethernet 0/0/15
+    type: 1000base-t
+  - name: gigabitethernet 0/0/16
+    type: 1000base-x-sfp
+  - name: gigabitethernet 0/0/17
+    type: 1000base-x-sfp
+uplink_interfaces:
+  - gigabitethernet 0/0/1
+  - gigabitethernet 0/0/2
+oob_interface: mgmt

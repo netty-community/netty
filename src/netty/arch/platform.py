@@ -17,19 +17,23 @@ from enum import StrEnum
 
 class Platform(StrEnum):
     cisco_xe = "cisco_xe"
+    cisco_nxos = "cisco_nxos"
     huawei_vrp = "huawei_vrp"
     ruijie_os = "ruijie_os"
     aruba_os = "aruba_os"
     fortinet = "fortinet"
+    paloalto = "paloalto"
 
     @classmethod
     def manufacturer(cls, platform: "Platform") -> "Manufacturer":
         mapping = {
             cls.cisco_xe: Manufacturer.cisco,
+            cls.cisco_nxos: Manufacturer.cisco,
             cls.huawei_vrp: Manufacturer.huawei,
             cls.ruijie_os: Manufacturer.ruijie,
             cls.aruba_os: Manufacturer.aruba,
             cls.fortinet: Manufacturer.fortinet,
+            cls.paloalto: Manufacturer.paloalto
         }
         manufacturer = mapping.get(platform)
         if manufacturer is None:
@@ -41,10 +45,12 @@ class Platform(StrEnum):
     def port_channel_prefix(cls, platform: "Platform")-> "PortChannelPrefix":
         mapping = {
             cls.cisco_xe: PortChannelPrefix.cisco,
+            cls.cisco_nxos: PortChannelPrefix.cisco,
             cls.huawei_vrp: PortChannelPrefix.huawei,
             cls.ruijie_os: PortChannelPrefix.ruijie,
             cls.aruba_os: PortChannelPrefix.aruba,
             cls.fortinet: PortChannelPrefix.fortinet,
+            cls.paloalto: PortChannelPrefix.paloalto
         }
         prefix = mapping.get(platform)
         if prefix is None:
@@ -59,6 +65,7 @@ class Manufacturer(StrEnum):
     ruijie = "Ruijie"
     aruba = "HPE"
     fortinet = "Fortinet"
+    paloalto = "PaloAlto"
 
     @classmethod
     def to_list_str(cls):
@@ -71,3 +78,4 @@ class PortChannelPrefix(StrEnum):
     ruijie = "Agg"
     aruba = "Po"
     fortinet = "agg"
+    paloalto = "AE"

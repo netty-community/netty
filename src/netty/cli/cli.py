@@ -13,20 +13,17 @@ limitations under the License.
 """
 
 import logging
-import csv
+from pathlib import Path
 
 import typer
 import yaml
 
-from netty.consts import PROJECT_DIR
+from netty.consts import PROJECT_DIR, DEFAULT_NETWORK_TEMPLATE_PATH
 from netty.cli.default import (
     generate_default_config_yaml,
-    generate_default_connection_headers,
-    generate_default_device_headers,
-    generate_default_fix_ip_headers,
-    generate_default_subnet_headers,
     generate_project_yaml,
 )
+from netty.cli.xlsx_helper import gen_template_xlsx
 
 logger = logging.getLogger(__name__)
 
@@ -63,22 +60,17 @@ def new(
     files_to_create = {
         "project.yaml": generate_project_yaml(),
         "config.yaml": generate_default_config_yaml(country_code),
-        "subnets.csv": generate_default_subnet_headers(),
-        "fix_ips.csv": generate_default_fix_ip_headers(),
-        "devices.csv": generate_default_device_headers(),
-        "connections.csv": generate_default_connection_headers(),
     }
 
     for filename, content in files_to_create.items():
         file_path = project_dir / filename
         if not file_path.exists():
             with file_path.open("w", newline="", encoding="utf-8-sig") as f:
-                if isinstance(content, list):
-                    writer = csv.DictWriter(f, fieldnames=content)
-                    writer.writeheader()
-                else:
-                    yaml.safe_dump(content, f, indent=4, sort_keys=False)
+                yaml.safe_dump(content, f, indent=4, sort_keys=False)
 
+    path=Path(DEFAULT_NETWORK_TEMPLATE_PATH)
+    if not path.exists():
+        gen_template_xlsx(country_code, path)
     configuration_dir = project_dir / "configuration"
     configuration_dir.mkdir(parents=True, exist_ok=True)
 

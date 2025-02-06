@@ -24,13 +24,7 @@ def generate_default_config_yaml(region: str):
             "enable_ipv6": False,
             "enable_netflow": True,
             "errdisable_recovery_interval": 300,
-            "default_banner": (
-                "------------------------------------------------------------------------------------------------------\n"
-                "Welcome to login Network Device\n"
-                "This is a private property facility to be accessed by authorized users for internal systems.\n"
-                "Unauthorized access is strictly prohibited.\n"
-                "-------------------------------------------------------------------------------------------------------\n"
-            ),
+            "default_banner": ""
         },
         "system_config": {
             "management_username": "admin",

@@ -13,6 +13,7 @@ limitations under the License.
 """
 
 from pathlib import Path
+from enum import StrEnum
 
 from pydantic import Field
 from pydantic_settings import (
@@ -24,6 +25,13 @@ from pydantic_settings import (
 
 PROJECT_DIR = Path(__file__).parent.parent.parent
 
+
+class TemplateName(StrEnum):
+    xlsx_file = "NetworkDesign.xlsx"
+    hardware_sheet = "Hardware Devices"
+    connection_sheet = "Device InterConnections"
+    subnet_sheet = "Subnets"
+    fix_ip_sheet = "Fixed IP Addresses"
 
 class ProjectConfig(BaseSettings):
     corp_name: str = Field(default="the corp name of project")
@@ -50,11 +58,9 @@ class ProjectConfig(BaseSettings):
 
 PROJECT_CONFIG = ProjectConfig()
 
-
-DEFAULT_SUBNETS_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/subnets.csv"
-DEFAULT_FIX_IPS_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/fix_ips.csv"
-DEFAULT_DEVICES_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/devices.csv"
+DEFAULT_NETWORK_TEMPLATE_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/{TemplateName.xlsx_file}"
 DEFAULT_PROJECT_INFO_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/project.yaml"
-DEFAULT_CONNECTIONS_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/connections.csv"
 DEFAULT_TOPOLOGY_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/topology.drawio"
 DEFAULT_CONFIG_OUTPUT_PATH = f"{PROJECT_DIR}//projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/configuration"
+
+
