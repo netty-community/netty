@@ -31,6 +31,6 @@ ha_ports:
   - a
   - b
 lan_ports:
-  - internal3
-  - internal4
-enhance_ha_port: internal5
+  - internal5
+  - internal6
+enhance_ha_port: internal4

@@ -66,12 +66,12 @@ interfaces:
     type: 1000base-x-sfp
     # combo: description: Shared media (You can use 1 of the 2 ports **WITH** this name. 1 is 1000base-x-sfp & the other is 1000base-t.)
 ha_ports:
+  - ha1
+  - ha2
+lan_ports:
   - port11
   - port12
-lan_ports:
-  - port9
-  - port10
-enhance_ha_port: x1
+enhance_ha_port: port10
 uplink_interfaces:
   - wan1
   - wan2

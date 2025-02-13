@@ -18,7 +18,7 @@ from pathlib import Path
 import typer
 import yaml
 
-from netty.consts import PROJECT_DIR, DEFAULT_NETWORK_TEMPLATE_PATH
+from netty.consts import PROJECT_DIR, DEFAULT_NETWORK_TEMPLATE_PATH, TemplateName
 from netty.cli.default import (
     generate_default_config_yaml,
     generate_project_yaml,
@@ -70,7 +70,7 @@ def new(
 
     path=Path(DEFAULT_NETWORK_TEMPLATE_PATH)
     if not path.exists():
-        gen_template_xlsx(country_code, path)
+        gen_template_xlsx(country_code, project_dir/TemplateName.xlsx_file)
     configuration_dir = project_dir / "configuration"
     configuration_dir.mkdir(parents=True, exist_ok=True)
 

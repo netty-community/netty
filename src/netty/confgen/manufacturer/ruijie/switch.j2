@@ -1,43 +1,56 @@
 {%if switch.enable_stack and switch.stack_config -%}
 ---------DO NOT COPY THIS LINE: Master switch stack configuration--------
+config terminal
 switch virtual domain 1
     switch 1
     switch 1 priority 200
-vsl-priority
+vsl-port
     port-member interface {{switch.stack_config.stack_ports[0]}}
     port-member interface {{switch.stack_config.stack_ports[1]}}
 end
 write
 switch convert mode virtual
+yes
 
 ---------DO NOT COPY THIS LINE: Slave switch stack configuration--------
+config terminal
 switch virtual domain 1
     switch 2
     switch 2 priority 150
-vsl-priority
+vsl-port
     port-member interface {{switch.stack_config.stack_ports[0]}}
     port-member interface {{switch.stack_config.stack_ports[1]}}
 end
 write
 switch convert mode virtual
+yes
+
+{%if switch.oob_interfaces|length >1%}
+config terminal
+mgmt_unique
+end
+write
+reload
+{%-endif%}
 
 ---------DO NOT COPY THIS LINE: switch MAD configuration--------
 interface {{switch.stack_config.mad_ports[0]}}
-    description to_MAD_port
-    no switchport
-    no lldp neighbor
+description to_MAD_port
+no switchport
+no lldp enable
 interface {{switch.stack_config.mad_ports[1]}}
-    description to_MAD_port
-    no switchport
-    no lldp neighbor
+description to_MAD_port
+no switchport
+no lldp enable
 switch virtual domain 1
-    dual-active detection bfd
-    dual-active bfd interface {{switch.stack_config.mad_ports[0]}}
-    dual-active bfd interface {{switch.stack_config.mad_ports[1]}}
-
+dual-active detection bfd
+dual-active bfd interface {{switch.stack_config.mad_ports[0]}}
+dual-active bfd interface {{switch.stack_config.mad_ports[1]}}
 {%- endif %}
 
-rdlp enable
+--------DO NOT COPY THIS LINE: switch configuration start--------
+
+rldp enable
 lldp enable
 ip dhcp snooping
 ip ssh key-exchange dh_group_exchange_sha1 dh_group14_sha1 ecdh_sha2_nistp256 ecdh_sha2_nistp384 ecdh_sha2_nistp521
@@ -46,7 +59,7 @@ ip ssh hmac-algorithm sha2-256 sha2-512
 ip ssh version 2
 enable service ssh-server
 enable service snmp-agent
-errdisable auto-recover interval 300
+errdisable recover interval 300
 {% if switch.baseline_config.enable_ipv6 -%}
 ipv6 enable
 ipv6 dhcp snooping
@@ -85,59 +98,31 @@ service dhcp
     {%for pool in switch.dhcp_pools%}
 ip dhcp pool {{pool.dhcp_pool_name}}
     default-router {{pool.dhcp_pool_gateway.ip}}
-    network {{pool.dhcp_pool_network.network_address}} {{pool.dhcp_pool_network.netmask}}
-    dns-server {{pool.dhcp_pool_dns_server[0]}} {{pool.dhcp_pool_dns_server[1]}}
-    lease-time 1 0 0
         {%if pool.dhcp_pool_range_start and pool.dhcp_pool_range_end%}
-    range {{pool.dhcp_pool_range_start}} {{pool.dhcp_pool_range_end}}
+    network {{pool.dhcp_pool_network.network_address}} {{pool.dhcp_pool_network.netmask}} {{pool.dhcp_pool_range_start}} {{pool.dhcp_pool_range_end}}
+        {%else%}
+    network {{pool.dhcp_pool_network.network_address}} {{pool.dhcp_pool_network.netmask}}
         {%endif%}
+    dns-server {{pool.dhcp_pool_dns_server[0]}} {{pool.dhcp_pool_dns_server[1]}}
+    lease 1 0 0
         {%if pool.fixed_ips%}
             {%for ip in pool.fixed_ips%}
-ip dhcp pool {{ip.name}}
-    default-router {{pool.dhcp_pool_gateway.ip}}
-    hardware-address {{ip.mac_address}}
-    host {{ip.ip.ip}} {{ip.ip.netmask}}
-    dns-server {{pool.dhcp_pool_dns_server[0]}} {{pool.dhcp_pool_dns_server[1]}}
-    lease-time 1 0 0
+    static-bind ip-address {{ip.ip.ip}} {{ip.ip.netmask}} hardware-address {{ip.mac_address}}
             {% endfor %}
         {% endif %}
-{% endfor %}
+    {% endfor %}
 {%- endif %}
 
 clock timezone CST 8
-ntp update-calender
+ntp update-calendar
 ntp server {{switch.system_config.ntp_server[0]}} source VLAN {{switch.system_config.management_vlan}} prefer
 ntp server {{switch.system_config.ntp_server[1]}} source VLAN {{switch.system_config.management_vlan}}
 
 aaa new-model
-aaa authentication exec default local
+aaa authorization exec default local
 aaa authentication login default local
 username {{switch.system_config.management_username}} privilege 15 password {{switch.system_config.management_password}}
 
-{% if switch.aaa_config and switch.aaa_config.servers -%}
-dot1x accounting default
-dot1x authentication default
-aaa accounting network default start-stop group accounting
-aaa authorization network default group dot1x
-aaa authentication dot1x default group dot1x
-    {% for server in switch.aaa_config.servers %}
-        {%if not switch.aaa_config.username%}
-radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} key {{switch.aaa_config.password}}
-        {%else%}
-radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} test username {{switch.aaa_config.username}} key {{switch.aaa_config.password}}
-        {%endif%}
-    {% endfor %}
-radius-server dead-criteria tries 5
-ip radius source-interface VLAN {{switch.system_config.management_vlan}}
-aaa group server radius dot1x
-    {% for server in switch.aaa_config.servers %}
-    server {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
-    {% endfor %}
-aaa group server radius accounting
-    {% for server in switch.aaa_config.servers %}
-    server {{server.compressed}} auth_port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
-    {%endfor%}
-{%-endif%}
 
 {%if switch.snmp_config.snmp_source_address-%}
 ip access-list standard snmp-acl
@@ -146,16 +131,16 @@ ip access-list standard snmp-acl
     {%endfor%}
 {%-endif%}
 {% if switch.snmp_config.snmp_version == "v2c"%}
-no snmp-server version v1
-no snmp-server version v3
+no snmp-server enable version v1
+no snmp-server enable version v3
 snmp-server enable version v2c
-snmp-server community {{switch.snmp_config.snmp_community}} ro {%if switch.snmp_config.snmp_source_address%} snmp-acl {endif}
+snmp-server community {{switch.snmp_config.snmp_community}} ro {%if switch.snmp_config.snmp_source_address%} snmp-acl
+{endif}
 {% elif switch.snmp_config.snmp_version =="v3" %}
-no snmp-server version v2c
-no snmp-server version v1
+no snmp-server enable version v2c
+no snmp-server enable version v1
 snmp-server enable version v3
-snmp-server user {{switch.snmp_config.snmp_v3_security_name}} {{switch.snmp_config.snmp_v3_security_name}} v3 encrypted
-auth {{switch.snmp_config.snmp_v3_auth_protocol}} {{switch.snmp_config.snmp_v3_auth_password}} priv {{switch.snmp_config.snmp_v3_priv_password}} {%if switch.snmp_config.snmp_source_address%} access snmp-acl {%endif%}
+snmp-server user {{switch.snmp_config.snmp_v3_security_name}} {{switch.snmp_config.snmp_v3_security_name}} v3 encrypted auth {{switch.snmp_config.snmp_v3_auth_protocol}} {{switch.snmp_config.snmp_v3_auth_password}} priv {{switch.snmp_config.snmp_v3_priv_password}} {%if switch.snmp_config.snmp_source_address%} access snmp-acl {%endif%}
 {%-endif%}
 {%if not switch.snmp_config.enable_trap%}
 no snmp-server enable traps
@@ -174,7 +159,6 @@ logging server {{switch.system_config.syslog_server}} udp-port {{switch.system_c
 {%-endif%}
 
 {%if switch.baseline_config.enable_netflow and switch.netflow_config -%}
-sflow enable
 sflow agent interface VLAN {{switch.system_config.management_vlan}}
 sflow collector 1 destination {{switch.netflow_config.flow_export_address}} {{switch.netflow_config.sflow_default_port}}
 {%endif%}
@@ -290,7 +274,7 @@ interface {{interface.if_name}}
 {%if interface.portfast%}
     spanning-tree portfast
     spanning-tree bpduguard enable
-    rdlp port loop-detect shutdown-port
+    rldp port loop-detect shutdown-port
 {%endif%}
 {%endfor%}
 {%- endif %}
@@ -303,7 +287,6 @@ line vty 0 {{switch.system_config.max_line_vty}}
     exec-timeout 15 0
     login authentication default
 
-
 {% if switch.default_gateway-%}
 {%if switch.default_gateway.version == 4%}
 ip route 0.0.0.0 0.0.0.0 {{switch.default_gateway.compressed}} description default_route
@@ -311,3 +294,28 @@ ip route 0.0.0.0 0.0.0.0 {{switch.default_gateway.compressed}} description defau
 ipv6 route ::/0 {{switch.default_gateway.compressed}} description default_route
 {%endif%}
 {%endif%}
+
+{% if switch.aaa_config and switch.aaa_config.servers -%}
+dot1x accounting default
+dot1x authentication default
+{% for server in switch.aaa_config.servers %}
+{%if not switch.aaa_config.username%}
+radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} key {{switch.aaa_config.password}}
+{%else%}
+radius-server host {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}} test username {{switch.aaa_config.username}} key {{switch.aaa_config.password}}
+{%endif%}
+{% endfor %}
+radius-server dead-criteria tries 5
+ip radius source-interface VLAN {{switch.system_config.management_vlan}}
+aaa group server radius dot1x
+{% for server in switch.aaa_config.servers %}
+    server {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
+{% endfor %}
+aaa group server radius accounting
+{% for server in switch.aaa_config.servers %}
+    server {{server.compressed}} auth-port {{switch.aaa_config.auth_port}} acct-port {{switch.aaa_config.acct_port}}
+{%endfor%}
+aaa authorization network default group dot1x
+aaa authentication dot1x default group dot1x
+aaa accounting network default start-stop group accounting
+{%-endif%}
