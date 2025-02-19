@@ -113,6 +113,35 @@ ip dhcp pool {{pool.dhcp_pool_name}}
     {% endfor %}
 {%- endif %}
 
+{% if switch.vlans -%}
+{%for v in switch.vlans%}
+vlan {{v.vlan_id}}
+{%if not v.vlan_name%}
+    name {{switch.site_code}}-{{v.vlan_id}}
+{%elif switch.site_code.lower() not in v.vlan_name.lower()%}
+    name {{switch.site_code}}-{{v.vlan_name}}
+{%else%}
+    name {{v.vlan_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{%if switch.vlan_ifs-%}
+{%for vlan_if in switch.vlan_ifs%}
+interface VLAN {{vlan_if.vlan_id}}
+    ip address {{vlan_if.gateway.ip.compressed}} {{vlan_if.network.netmask}}
+{%if vlan_if.vlan_name%}
+    description {{vlan_if.vlan_name}}
+{%endif%}
+{%if 'guest' in vlan_if.vlan_name.lower() and switch.enable_guest_acl%}
+    ip access-group Guest-Vlan300-deny in
+{%endif%}
+{%if vlan_if.vrf_name%}
+    ip vrf {{vlan_if.vrf_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
 clock timezone CST 8
 ntp update-calendar
 ntp server {{switch.system_config.ntp_server[0]}} source VLAN {{switch.system_config.management_vlan}} prefer
@@ -178,34 +207,6 @@ spanning-tree
 spanning-tree mst 0 priority {{switch.stp_priority}}
 {%-endif%}
 
-{% if switch.vlans -%}
-{%for v in switch.vlans%}
-vlan {{v.vlan_id}}
-{%if not v.vlan_name%}
-    name {{switch.site_code}}-{{v.vlan_id}}
-{%elif switch.site_code.lower() not in v.vlan_name.lower()%}
-    name {{switch.site_code}}-{{v.vlan_name}}
-{%else%}
-    name {{v.vlan_name}}
-{%endif%}
-{%endfor%}
-{%-endif%}
-
-{%if switch.vlan_ifs-%}
-{%for vlan_if in switch.vlan_ifs%}
-interface VLAN {{vlan_if.vlan_id}}
-    ip address {{vlan_if.gateway.ip.compressed}} {{vlan_if.network.netmask}}
-{%if vlan_if.vlan_name%}
-    description {{vlan_if.vlan_name}}
-{%endif%}
-{%if 'guest' in vlan_if.vlan_name.lower() and switch.enable_guest_acl%}
-    ip access-group Guest-Vlan300-deny in
-{%endif%}
-{%if vlan_if.vrf_name%}
-    ip vrf {{vlan_if.vrf_name}}
-{%endif%}
-{%endfor%}
-{%-endif%}
 
 {%if switch.routed_ifs-%}
 {%for interface in switch.routed_ifs%}

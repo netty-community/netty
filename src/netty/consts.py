@@ -58,6 +58,7 @@ class ProjectConfig(BaseSettings):
 
 PROJECT_CONFIG = ProjectConfig()
 
+DEFAULT_PROJECT_DIR = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}"
 DEFAULT_NETWORK_TEMPLATE_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/{TemplateName.xlsx_file}"
 DEFAULT_PROJECT_INFO_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/project.yaml"
 DEFAULT_TOPOLOGY_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/topology.drawio"

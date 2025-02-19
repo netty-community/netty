@@ -373,9 +373,8 @@ interface {{interface.if_name}}
     ip dhcp snooping trust
 {%endif%}
 {%if interface.portfast%}
-    spanning-tree portfast
-    spanning-tree bpduguard enable
-    rdlp port loop-detect shutdown-port
+    stp edged-port enable
+    stp bpdu-protection enable
 {%endif%}
 {%endfor%}
 {%-endif%}
