@@ -14,7 +14,6 @@ limitations under the License.
 
 from pathlib import Path
 
-from openpyxl import load_workbook
 
 from jinja2 import Environment, FileSystemLoader, Template
 
