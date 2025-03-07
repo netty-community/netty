@@ -12,7 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from pydantic import IPvAnyAddress
+from ipaddress import IPv4Address
 
 from netty.project import Device, Connection, StackPort
 from netty.arch import DeviceRole
@@ -25,7 +25,7 @@ from netty.utils.netif import (
 
 def generate_default_gateway(
     devices: list[Device], device: Device
-) -> IPvAnyAddress | None:
+) -> IPv4Address | None:
     switch_gateway = None
     fw_gateway = None
     for _device in devices:
@@ -57,7 +57,7 @@ def remove_duplicate_devices(devices: list[Device]) -> list[Device]:
     Remove duplicate devices by management_ip and hostname, when management_ip is the same, stacked is set to True
     """
     sorted_devices = __sort_devices(devices)
-    management_ip_mapping: dict[IPvAnyAddress, Device] = {}
+    management_ip_mapping: dict[IPv4Address, Device] = {}
     unique_devices: list[Device] = []
     for device in sorted_devices:
         if device.management_ip not in management_ip_mapping:
@@ -134,7 +134,7 @@ def firewall_working_mode(devices: list[Device]) -> FirewallWanHAMode:
         elif device.device_role == DeviceRole.internet_switch:
             int_sw_numbers += 1
     if firewall_numbers == 1:
-        return "single-node"
+        return "single_node"
     elif firewall_numbers >= 2:
         if int_sw_numbers == 0:
             return "enhance_ha_trunk_mode"

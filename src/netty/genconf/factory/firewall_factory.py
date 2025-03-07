@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import ClassVar
 from pathlib import Path
 
-from pydantic import IPvAnyInterface, IPvAnyAddress
+from ipaddress import IPv4Interface, IPv4Address
 
 from netty.arch import DeviceType
 from netty.project import LanNetwork, WanNetwork, WebFilter, Device, PhysicalInterface
@@ -28,8 +28,8 @@ from netty.consts import DEFAULT_CONFIG_OUTPUT_PATH
 @dataclass
 class Firewall:
     hostname: str
-    lan_ip: IPvAnyInterface
-    lan_gateway: IPvAnyAddress
+    lan_ip: IPv4Interface
+    lan_gateway: IPv4Address
     lan_networks: list[LanNetwork]
     wan_networks: WanNetwork
     enable_ha: bool

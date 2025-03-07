@@ -35,17 +35,17 @@ reload
 
 ---------DO NOT COPY THIS LINE: switch MAD configuration--------
 interface {{switch.stack_config.mad_ports[0]}}
-description to_MAD_port
-no switchport
-no lldp enable
+    description to_MAD_port
+    no switchport
+    no lldp enable
 interface {{switch.stack_config.mad_ports[1]}}
-description to_MAD_port
-no switchport
-no lldp enable
+    description to_MAD_port
+    no switchport
+    no lldp enable
 switch virtual domain 1
-dual-active detection bfd
-dual-active bfd interface {{switch.stack_config.mad_ports[0]}}
-dual-active bfd interface {{switch.stack_config.mad_ports[1]}}
+    dual-active detection bfd
+    dual-active bfd interface {{switch.stack_config.mad_ports[0]}}
+    dual-active bfd interface {{switch.stack_config.mad_ports[1]}}
 {%- endif %}
 
 --------DO NOT COPY THIS LINE: switch configuration start--------
@@ -113,6 +113,12 @@ ip dhcp pool {{pool.dhcp_pool_name}}
     {% endfor %}
 {%- endif %}
 
+{%if switch.vrf-%}
+{%for vrf in switch.vrf%}
+ip vrf {{vrf.vrf_name}}
+{%endfor%}
+{%-endif%}
+
 {% if switch.vlans -%}
 {%for v in switch.vlans%}
 vlan {{v.vlan_id}}
@@ -159,18 +165,11 @@ ip access-list standard snmp-acl
     {{(loop.index+1)*10}} permit {{addr.network_address.compressed}} {{netmask_to_wildcard_mask(address.netmask.compressed)}}
     {%endfor%}
 {%-endif%}
-{% if switch.snmp_config.snmp_version == "v2c"%}
 no snmp-server enable version v1
 no snmp-server enable version v3
 snmp-server enable version v2c
-snmp-server community {{switch.snmp_config.snmp_community}} ro {%if switch.snmp_config.snmp_source_address%} snmp-acl
-{endif}
-{% elif switch.snmp_config.snmp_version =="v3" %}
-no snmp-server enable version v2c
-no snmp-server enable version v1
-snmp-server enable version v3
-snmp-server user {{switch.snmp_config.snmp_v3_security_name}} {{switch.snmp_config.snmp_v3_security_name}} v3 encrypted auth {{switch.snmp_config.snmp_v3_auth_protocol}} {{switch.snmp_config.snmp_v3_auth_password}} priv {{switch.snmp_config.snmp_v3_priv_password}} {%if switch.snmp_config.snmp_source_address%} access snmp-acl {%endif%}
-{%-endif%}
+snmp-server community {{switch.snmp_config.snmp_community}} ro {%if switch.snmp_config.snmp_source_address%} snmp-acl {endif}
+
 {%if not switch.snmp_config.enable_trap%}
 no snmp-server enable traps
 {%else%}

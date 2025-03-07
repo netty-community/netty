@@ -16,6 +16,7 @@ from typing import NamedTuple
 
 
 from netty.project import Subnet
+from netty.consts import DEFAULT_PROJECT_DIR
 
 
 class VlanSize(NamedTuple):
@@ -189,6 +190,16 @@ class Subnetter:
                 )
             )
         return results
+    
+    def to_csv(self):
+        results = self.allocate()
+        with open(f"{DEFAULT_PROJECT_DIR}/subnets.csv", "w") as f:
+            f.write("VlanId,VlanName,DHCPNetwork,DHCPPool,DHCPPoolRangeStart,DHCPPoolRangeEnd,IfAddress\n")
+            for r in results:
+                dns = ",".join([i.compressed for i in r.dns_server])
+                f.write(f"{r.vlan_id},{r.name},{r.dhcp_network},{r.dhcp_pool},{dns},{r.dhcp_range_start},{r.dhcp_range_end},{r.if_addr}\n")
+        
+            
 
 a = Subnetter(
     "10.0.0.0/19",

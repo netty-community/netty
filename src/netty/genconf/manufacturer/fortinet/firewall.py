@@ -16,13 +16,13 @@ from typing import ClassVar
 from pathlib import Path
 
 
-from netty.confgen.factory.firewall_factory import FirewallFactory
+from netty.genconf.factory.firewall_factory import FirewallFactory
 from netty.consts import PROJECT_DIR
 
 
 class FortinetFirewall(FirewallFactory):
     default_jinja_template_path: ClassVar[Path] = Path(
-        f"{PROJECT_DIR}/src/netty/confgen/manufacturer/fortinet/"
+        f"{PROJECT_DIR}/src/netty/genconf/manufacturer/fortinet/"
     )
     default_jinja_template_name: ClassVar[str] = "firewall.j2"
 

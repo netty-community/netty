@@ -17,7 +17,7 @@ from pathlib import Path
 
 from jinja2 import Template
 
-from netty.confgen.factory.switch_factory import Switch, SwitchFactory, Stp
+from netty.genconf.factory.switch_factory import Switch, SwitchFactory, Stp
 from netty.utils.mac import MacAddress
 from netty.utils.file import load_jinja2_template
 from netty.consts import PROJECT_DIR
@@ -25,7 +25,7 @@ from netty.consts import PROJECT_DIR
 
 class RuijieSwitch(SwitchFactory):
     default_jinja_template_path: ClassVar[Path] = Path(
-        f"{PROJECT_DIR}/src/netty/confgen/manufacturer/ruijie/"
+        f"{PROJECT_DIR}/src/netty/genconf/manufacturer/ruijie/"
     )
     default_jinja_template_name: ClassVar[str] = "switch.j2"
 

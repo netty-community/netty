@@ -16,7 +16,7 @@ import logging
 from dataclasses import dataclass
 
 
-from pydantic import IPvAnyAddress
+from ipaddress import IPv4Address
 from netmiko import ConnectHandler, BaseConnection
 from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutException
 from tcppinglib import tcpping
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ZtpConfPush:
-    ip: IPvAnyAddress
+    ip: IPv4Address
     platform: Platform
     username: str
     password: str

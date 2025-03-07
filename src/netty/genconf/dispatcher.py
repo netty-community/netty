@@ -14,11 +14,12 @@ limitations under the License.
 
 from netty.arch import Platform, ProductFamily
 from netty.project import Device
-from netty.confgen.factory.switch_factory import SwitchFactory
-# from netty.confgen.factory.firewall_factory import FirewallFactory
+from netty.genconf.factory.switch_factory import SwitchFactory
+# from netty.genconf.factory.firewall_factory import FirewallFactory
 
-from netty.confgen.manufacturer.ruijie.switch import RuijieSwitch
-from netty.confgen.manufacturer.huawei.switch import HuaweiSwitch
+from netty.genconf.manufacturer.ruijie.switch import RuijieSwitch
+from netty.genconf.manufacturer.huawei.switch import HuaweiSwitch
+from netty.genconf.manufacturer.cisco.switch import CiscoSwitch
 
 
 def get_switch_factory(device: Device) -> type[SwitchFactory] | None:
@@ -32,6 +33,11 @@ def get_switch_factory(device: Device) -> type[SwitchFactory] | None:
         and device.device_type.product_family == ProductFamily.switch
     ):
         return HuaweiSwitch
+    if (
+        device.device_type.platform == Platform.cisco_xe
+        and device.device_type.product_family == ProductFamily.switch
+    ):
+        return CiscoSwitch
     return None
 
 

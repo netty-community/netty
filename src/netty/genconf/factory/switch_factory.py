@@ -15,8 +15,9 @@ limitations under the License.
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal, ClassVar
+from ipaddress import IPv4Network, IPv4Address, IPv4Interface
 
-from pydantic import IPvAnyNetwork, IPvAnyAddress, PositiveInt, IPvAnyInterface
+from pydantic import PositiveInt
 
 from netty.arch import DeviceRole
 from netty.project import FixedIP, Device, Subnet, PhysicalInterface, StackPort
@@ -53,23 +54,29 @@ class Vrf:
 @dataclass
 class VlanIf:
     vlan_id: PositiveInt
-    network: IPvAnyNetwork
-    gateway: IPvAnyAddress
+    network: IPv4Network
+    gateway: IPv4Address
     vlan_name: str | None = None
     vrf_name: str | None = None
     enable_dhcp: bool = False
 
+@dataclass
+class DHCPExcludeRange:
+    range_start: IPv4Address
+    range_end: IPv4Address
 
 @dataclass
 class DHCPPool:
     dhcp_pool_name: str
-    dhcp_pool_network: IPvAnyNetwork
-    dhcp_pool_gateway: IPvAnyInterface
-    dhcp_pool_dns_server: list[IPvAnyAddress]
-    dhcp_pool_range_start: IPvAnyAddress | None = None
-    dhcp_pool_range_end: IPvAnyAddress | None = None
+    dhcp_pool_network: IPv4Network
+    dhcp_pool_gateway: IPv4Interface
+    dhcp_pool_dns_server: list[IPv4Address]
+    dhcp_pool_range_start: IPv4Address | None = None
+    dhcp_pool_range_end: IPv4Address | None = None
     dhcp_pool_lease_time: int = 86400
     fixed_ips: list["FixedIP"] = field(default_factory=lambda: [])
+    # it's only for cisco
+    exclude_ranges: list["DHCPExcludeRange"] = field(default_factory=lambda: [])
 
 
 @dataclass
@@ -103,7 +110,7 @@ class Switch:
     physical_ifs: list["PhysicalInterface"] | None = None
     port_channels: list["PortChannel"] | None = None
     vrfs: list["Vrf"] | None = None
-    default_gateway: IPvAnyAddress | None = None
+    default_gateway: IPv4Address | None = None
 
     def __setattr__(self, name: str, value: Any) -> None:
         """used for vendor customized fields only"""

@@ -21,7 +21,7 @@ from pydantic import BaseModel
 from openpyxl import load_workbook
 from openpyxl.workbook import Workbook
 import yaml
-from pydantic import IPvAnyAddress 
+from ipaddress import IPv4Address 
 from netty.consts import (
     DEFAULT_PROJECT_INFO_PATH,
     DEFAULT_NETWORK_TEMPLATE_PATH,
@@ -73,8 +73,8 @@ def enrich_devices_and_connections(
 ) -> tuple[list[Device], list[Connection]]:
     """TODO: enrich connections when local_interface_name and remote_interface name is integer by devicetype"""
     sorted_devices = sorted(devices, key=lambda x: x.hostname)
-    management_ip_count:dict[IPvAnyAddress, int] = defaultdict(int)
-    cluster: dict[IPvAnyAddress, list[Device]] = defaultdict(list)
+    management_ip_count:dict[IPv4Address, int] = defaultdict(int)
+    cluster: dict[IPv4Address, list[Device]] = defaultdict(list)
     for device in sorted_devices:
         if device.device_role == DeviceRole.wlan_ap:
             continue
@@ -82,7 +82,7 @@ def enrich_devices_and_connections(
     for device in sorted_devices:
         if management_ip_count[device.management_ip] > 1:
             device.stacked = True
-            cluster[device.management_ip].append(device)
+        cluster[device.management_ip].append(device)
     hostname_device_mapping = {device.hostname: device for device in devices}
     for conn in conns:
         local_device = hostname_device_mapping.get(conn.local_hostname)

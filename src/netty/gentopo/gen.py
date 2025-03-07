@@ -17,7 +17,7 @@ from pathlib import Path
 from collections import defaultdict
 
 from netty.arch import DeviceRole
-from netty.topogen.diagram import Node, Link, Group
+from netty.gentopo.diagram import Node, Link, Group
 from netty.project import Device, Connection
 from netty.consts import DEFAULT_TOPOLOGY_PATH, PROJECT_CONFIG
 

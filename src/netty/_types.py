@@ -15,14 +15,6 @@ limitations under the License.
 from typing import Literal
 
 type IfMode = Literal["access", "trunk", "routed"]
-type SnmpVersion = Literal["v2c", "v3"]
-type Snmpv3SecurityLevel = Literal["noAuthNoPriv", "authNoPriv", "authPriv"]
-type Snmpv3AuthProtocol = Literal[
-    "NoAuth", "MD5", "SHA", "SHA224", "SHA256", "SHA384", "SHA512"
-]
-type Snmpv3PrivProtocol = Literal[
-    "NoPriv", "DES", "AES", "AES192", "AES256", "AES192C", "AES256C"
-]
 type AAAProtocol = Literal["radius", "tacacs"]
 type FlowType = Literal["netflow", "sflow", "netstream", None]
-type FirewallWanHAMode = Literal["enhance_ha_trunk_mode", "internet_switch_ha_mode", "single-node"]
+type FirewallWanHAMode = Literal["enhance_ha_trunk_mode", "internet_switch_ha_mode", "single_node"]

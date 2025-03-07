@@ -1,0 +1,279 @@
+---------DO NOT COPY THIS LINE: switch MAD configuration--------
+interface {{switch.stack_config.mad_ports[0]}}
+    description to_MAD_port
+    stackwise-virtual dual-active-detection
+interface {{switch.stack_config.mad_ports[1]}}
+    description to_MAD_port
+    stackwise-virtual dual-active-detection
+{%- endif %}
+
+--------DO NOT COPY THIS LINE: switch configuration start--------
+
+no ip bootp server
+no ip finger
+no ip mask-reply
+no ip icmp redirect
+no service pad
+no service tcp-small-services
+no service udp-small-services
+no cdp run
+no ip source routing
+no ip http server
+no ip http secure-server
+no ip dhcp snooping information option
+
+ip routing
+ip forward-protocol nd
+
+errdisable recovery cause bpduguard
+errdisable recovery cause security-violation
+errdisable recovery cause inline-power
+errdisable recovery cause link-flap
+errdisable recovery interval 300
+
+{% if switch.baseline_config.enable_ipv6 -%}
+ipv6 enable
+ipv6 dhcp snooping
+{%endif%}
+ip ssh bulk-mode 131072
+ip ssh time-out 60
+ip ssh server algorithm mac hmac-sha1
+ip ssh server algorithm encryption aes256-ctr
+ip ssh server algorithm kex ecdh_sha2_nistp256
+ip dhcp snooping
+lldp run
+
+no ip domain-lookup
+hostname {{switch.hostname}}
+banner login ^CCC
+{{switch.baseline_config.default_banner}}^C
+{% if switch.enable_guest_acl -%}
+ip access-list extended Guest-Vlan300-deny
+    10 permit udp any any eq domain
+    15 permit udp any any eq bootpc
+    20 permit icmp any any
+    25 permit udp any any eq bootps
+    30 permit tcp any any eq domain
+    35 deny ip any 10.0.0.0 0.255.255.255
+    40 deny ip any 192.168.0.0 0.0.255.255
+    45 deny ip any 172.16.0.0 0.15.255.255
+    50 deny ip any 30.0.0.0 0.255.255.255
+    55 deny ip any 100.64.0.0 0.63.255.255
+    1000 permit ip any any
+{%- endif %}
+
+{% if switch.dhcp_pools-%}
+service dhcp
+    {%for pool in switch.dhcp_pools%}
+ip dhcp pool {{pool.dhcp_pool_name}}
+    default-router {{pool.dhcp_pool_gateway.ip}}
+    network {{pool.dhcp_pool_network.network_address}} {{pool.dhcp_pool_network.netmask}}
+    dns-server {{pool.dhcp_pool_dns_server[0]}} {{pool.dhcp_pool_dns_server[1]}}
+    lease 1 0 0
+        {%if pool.fixed_ips%}
+            {%for ip in pool.fixed_ips%}
+    address {{ip.ip.ip}} hardware-address {{ip.mac_address}}
+            {% endfor %}
+        {% endif %}
+    {%if pool.exclude_ranges%}
+        {%for er in pool.exclude_ranges%}
+ip dhcp excluded-address {{er.range_start}} {{er.range_end}}
+        {% endfor %}
+    {%endif%}
+{%- endif %}
+
+{% if switch.vlans -%}
+{%for v in switch.vlans%}
+vlan {{v.vlan_id}}
+{%if not v.vlan_name%}
+    name {{switch.site_code}}-{{v.vlan_id}}
+{%elif switch.site_code.lower() not in v.vlan_name.lower()%}
+    name {{switch.site_code}}-{{v.vlan_name}}
+{%else%}
+    name {{v.vlan_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{%if switch.vlan_ifs-%}
+{%for vlan_if in switch.vlan_ifs%}
+interface VLAN {{vlan_if.vlan_id}}
+    ip address {{vlan_if.gateway.ip.compressed}} {{vlan_if.network.netmask}}
+{%if vlan_if.vlan_name%}
+    description {{vlan_if.vlan_name}}
+{%endif%}
+{%if 'guest' in vlan_if.vlan_name.lower() and switch.enable_guest_acl%}
+    ip access-group Guest-Vlan300-deny in
+{%endif%}
+{%if vlan_if.vrf_name%}
+    ip vrf {{vlan_if.vrf_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+clock timezone CST 8 0
+service timestamp debug datetime msec
+service timestamp log datetime localtime show-timezone
+ntp source-interface Vlan{{switch.system_config.management_vlan}}
+ntp server {{switch.system_config.ntp_server[0]}} prefer
+ntp server {{switch.system_config.ntp_server[0]}}
+
+aaa new-model
+aaa authorization exec default local
+aaa authentication login default local
+username {{switch.system_config.management_username}} privilege 15 password {{switch.system_config.management_password}}
+
+{%if switch.snmp_config.snmp_source_address-%}
+ip access-list standard snmp-acl
+    {%for addr in switch.snmp_config.snmp_source_address%}
+    {{(loop.index+1)*10}} permit {{addr.network_address.compressed}} {{netmask_to_wildcard_mask(address.netmask.compressed)}}
+    {%endfor%}
+{%-endif%}
+
+snmp-server enable version v2c
+snmp-server view MIB-2 mib-2 inclued
+snmp-server community {{switch.system_config.snmp_community}} RO {%if switch.snmp_config.snmp_source_address%} snmp-acl {%endif%}
+{%if not switch.snmp_config.enable_trap-%}
+no snmp-server enable traps
+{%else%}
+snmp-server enable traps
+snmp-server host {{switch.snmp_config.snmp_trap_server.compressed}} traps {{switch.snmp_config.snmp_trap_password}}
+snmp-server trap-source Vlan{{switch.system_config.management_vlan}}
+{%-endif%}
+{%if switch.system_config.syslog_server-%}
+logging buffered 409600
+logging rate-limit console 5
+no logging console
+authentication logging verbose
+no device-tracking logging theft
+ip ssh logging events
+logging origin-id hostname
+logging facility local2
+logging source-interface Vlan{{switch.system_config.management_vlan}}
+logging host {{switch.system_config.syslog_server}} transport udp port {{switch.system_config.syslog_udp_port}}
+{%-endif%}
+
+{%if switch.baseline_config.enable_netflow and switch.netflow_config -%}
+flow export netflow
+    destination {{switch.netflow_config.flow_export_address}}
+    transport udp {{switch.netflow_config.netflow_default_port}}
+flow record netflow
+    match ipv4 source address
+    match ipv4 destination address
+    match ipv4 protocol
+    match transport source-port
+    match transport destination-port
+    match flow cts source group-tag
+    match flow cts destination group
+    collect counter byte long
+    collect counter packet long
+    collect timestamp absolute first
+    collect timestamp absolute last
+flow monitor netflow
+    record netflow
+    exporter netflow
+    cache timeout active 60
+    cache timeout interval 15
+{%endif%}
+
+
+spanning-tree mode mst
+spanning-tree extend system-id
+spanning mst configuration
+    revision 1
+    name mst
+    instance 0 vlan 1-4094
+{% if switch.stp_root-%}
+spanning-tree mst 0 priority {{switch.stp_priority}}
+{%-endif%}
+
+
+{%if switch.routed_ifs-%}
+{%for interface in switch.routed_ifs%}
+interface {{interface.if_name}}
+    no switchport
+    ip address {{interface.if_addr.ip.compressed}} {{interface.if_addr.netmask}}
+{%if interface.mtu%}
+    mtu {{interface.mtu}}
+{%endif%}
+{%if interface.if_descr%}
+    description {{interface.if_descr}}
+{%endif%}
+{%if interface.vrf_name%}
+    ip vrf {{interface.vrf_name}}
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{%if switch.port_channels-%}
+{%for port in switch.port_channels%}
+interface port-channel {{port.port_channel_id}}
+{%if port.if_descr%}
+    description {{port.if_descr}}
+{%endif%}
+{% if port.enable_netflow%}
+    ip flow monitor netflow input
+{%endif%}
+{%if port.if_mode=="trunk"%}
+    switchport mode trunk
+    switchport trunk allow vlan all
+{%else%}
+    switchport mode access
+    switchport access vlan {{port.vlan_id}}
+{%endif%}
+{%if port.dhcp_snooping_trust%}
+    ip dhcp snooping trust
+{%endif%}
+{%endfor%}
+{%-endif%}
+
+{% if switch.physical_ifs -%}
+{%for interface in switch.physical_ifs%}
+interface {{interface.if_name}}
+{%if interface.if_descr%}
+    description {{interface.if_descr}}
+{%endif%}
+{% if interface.enable_netflow%}
+    ip flow monitor netflow input
+{%endif%}
+{% if interface.port_channel_id %}
+    port-group {{interface.port_channel_id}} mode active
+{%elif interface.if_mode=="trunk"%}
+    switchport mode trunk
+    switchport trunk allow vlan all
+{%else%}
+    switch mode access
+    switch access vlan {{interface.vlan_id}}
+{%endif%}
+{%if interface.dhcp_snooping_trust%}
+    ip dhcp snooping trust
+{%endif%}
+{%if interface.portfast%}
+    spanning-tree portfast
+    spanning-tree bpduguard enable
+    rldp port loop-detect shutdown-port
+{%endif%}
+{%endfor%}
+{%- endif %}
+
+line console 0
+    password {{switch.system_config.management_password}}
+    exec-timeout 15 0
+    logging synchronous
+    stopbits 1
+line vty 0 {{switch.system_config.max_line_vty}}
+    transport input ssh
+    transport output all
+    logging synchronous
+    exec-timeout 15 0
+    login authentication default
+    authorization exec default
+    authorization commands 15 default
+
+{% if switch.default_gateway-%}
+{%if switch.default_gateway.version == 4%}
+ip route 0.0.0.0 0.0.0.0 {{switch.default_gateway.compressed}} description default_route
+{%else%}
+ipv6 route ::/0 {{switch.default_gateway.compressed}} description default_route
+{%endif%}
+{%endif%}

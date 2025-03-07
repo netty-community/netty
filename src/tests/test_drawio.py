@@ -1,5 +1,5 @@
-from netty.topogen.gen import TopoGen
-from netty.topogen.diagram import Link, Node
+from netty.gentopo.gen import TopoGen
+from netty.gentopo.diagram import Link, Node
 from netty.arch import DeviceRole
 from pathlib import Path
 

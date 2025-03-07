@@ -13,10 +13,9 @@ limitations under the License.
 """
 
 from ipaddress import IPv4Address
-from pydantic import IPvAnyAddress
 
 
-def get_default_dns_server(region: str) -> list[IPvAnyAddress]:
+def get_default_dns_server(region: str) -> list[IPv4Address]:
     """
     Get the default dns server of the region, if region is CN, return aliyun public dns server,
     else return google public dns server
@@ -26,7 +25,7 @@ def get_default_dns_server(region: str) -> list[IPvAnyAddress]:
     return [IPv4Address("8.8.8.8"), IPv4Address("8.8.4.4")]
 
 
-def get_default_ntp_server(region: str) -> list[IPvAnyAddress]:
+def get_default_ntp_server(region: str) -> list[IPv4Address]:
     """
     Get the default ntp server of the region, if region is CN, return aliyun public ntp server,
     else return google public ntp server

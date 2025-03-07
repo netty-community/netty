@@ -12,9 +12,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from ipaddress import IPv4Address
-
-from pydantic import Field, IPvAnyAddress, IPvAnyNetwork, BaseModel
+from ipaddress import IPv4Address, IPv4Network
+from pydantic import BaseModel, Field
 from pydantic_extra_types.timezone_name import TimeZoneName
 from pydantic_settings import (
     BaseSettings,
@@ -22,10 +21,7 @@ from pydantic_settings import (
     SettingsConfigDict,
     YamlConfigSettingsSource,
 )
-from netty._types import (
-    SnmpVersion,
-    AAAProtocol,
-)
+from netty._types import AAAProtocol
 from netty.consts import PROJECT_DIR, PROJECT_CONFIG
 
 
@@ -62,7 +58,7 @@ class Settings(BaseSettings):
 
 
 class BaselineConfig(BaseModel):
-    ssh_source_address: list[IPvAnyNetwork] | None = Field(
+    ssh_source_address: list[IPv4Network] | None = Field(
         default=None,
         description="The source network address can access ssh, default is all",
     )
@@ -101,40 +97,36 @@ class SystemConfig(BaseModel):
     default_timezone: TimeZoneName = Field(
         default="Asia/Shanghai", description="The default timezone of the device"
     )  # type: ignore
-    ntp_server: list[IPvAnyAddress] = Field(description="The ntp server of the device")
-    dns_server: list[IPvAnyAddress] = Field(description="The dns server of the device")
-    syslog_server: IPvAnyAddress | None = Field(
+    ntp_server: list[IPv4Address] = Field(description="The ntp server of the device")
+    dns_server: list[IPv4Address] = Field(description="The dns server of the device")
+    syslog_server: IPv4Address | None = Field(
         default=None, description="The syslog server of the device"
     )
     syslog_udp_port: int = Field(
         default=514, description="The syslog udp port of the device"
     )
     max_line_vty: int = Field(default=15, description="The max line vty of the device")
-    firewall_manager: IPvAnyAddress = Field(
+    firewall_manager: IPv4Address = Field(
         default=IPv4Address("0.0.0.0"),  # noqa: S104
         description="The firewall manager of the device, like fortimanager for fortinet and panoroma for PaloAlto",
     )
 
 
 class SnmpConfig(BaseModel):
-    snmp_version: SnmpVersion = Field(
-        default="v2c",
-        description="The version of the snmp, default is v2c with read only",
-    )
     snmp_community: str = Field(
         default="public", description="The community of the snmp, default is public"
     )
     snmp_port: int = Field(
         default=161, description="The port of the snmp, default is 161"
     )
-    snmp_source: list[IPvAnyNetwork] | None = Field(
+    snmp_source: list[IPv4Network] | None = Field(
         default=None,
         description="The source network address can access snmp, default is all",
     )
 
 
 class NetflowConfig(BaseModel):
-    flow_export_address: IPvAnyAddress | None = Field(
+    flow_export_address: IPv4Address | None = Field(
         default=None, description="The flow export address of the device"
     )
     flow_sample_rate: int = Field(
@@ -153,7 +145,7 @@ class NetflowConfig(BaseModel):
 
 class AAAConfig(BaseModel):
     aaa_protocol: AAAProtocol
-    servers: list[IPvAnyAddress]
+    servers: list[IPv4Address]
     auth_port: int = Field(default=1812)
     acct_port: int = Field(default=1813)
     username: str | None = Field(default=None, description="aaa test username")

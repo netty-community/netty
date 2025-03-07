@@ -179,24 +179,11 @@ acl name snmp-acl 2999
     {%endfor%}
     rule 1000 deny logging
 {%-endif%}
-{% if switch.snmp_config.snmp_version == "v2c"-%}
 snmp-agent
 snmp-agent community read cipher {{switch.snmp_config.snmp_community}} mib-view iso-view {%if switch.snmp_config.snmp_source_address%} acl 2999 {%endif%}
 snmp-agent sys-info version v2c
 snmp-agent mib-view included iso-view iso
 snmp-agent protocol source-status Vlanif {{switch.system_config.management_vlan}}
-{% elif switch.snmp_config.snmp_version =="v3" %}
-snmp-agent
-snmp-agent sys-info version v3
-snmp-agent group v3 netgroup privacy read-view MIB-2 {%if switch.snmp_config.snmp_source_address-%} acl 2999 {%-endif%}
-snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}}
-snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} group {{switch.snmp_config.snmp_v3_security_name}}
-snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} authentication-mode {{switch.snmp_config.snmp_v3_auth_protocol}} cipher {{switch.snmp_config.snmp_v3_auth_password}}
-snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} privacy-mode {{switch.snmp_config.snmp_v3_priv_protocol}}  cipher {{switch.snmp_config.snmp_v3_priv_password}}
-    {%if switch.snmp_config.snmp_source_address%}
-snmp-agent usm-user v3 {{switch.snmp_config.snmp_v3_security_name}} acl 2999
-    {%endif%}
-{%-endif%}
 {%if switch.snmp_config.enable_trap-%}
 snmp-agent enable traps
 snmp-agent host {{switch.snmp_config.snmp_trap_server.compressed}} traps {{switch.snmp_config.snmp_trap_password}}

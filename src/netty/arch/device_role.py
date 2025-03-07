@@ -134,11 +134,9 @@ class DeviceRole(StrEnum):
 
 
 def enable_if_netflow_export(
-    local_role: DeviceRole, remote_role: DeviceRole, port_channel: bool
+    local_role: DeviceRole, remote_role: DeviceRole
 ) -> bool:
     if local_role == DeviceRole.core_switch and remote_role == DeviceRole.firewall:
-        if port_channel:
-            return False
         return True
     return False
 

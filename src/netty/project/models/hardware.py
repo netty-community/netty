@@ -13,13 +13,11 @@ limitations under the License.
 """
 
 from functools import lru_cache
-
+from ipaddress import IPv4Address,IPv4Interface
 
 from pydantic import (
     BaseModel,
     Field,
-    IPvAnyAddress,
-    IPvAnyInterface,
     field_validator,
     model_validator,
     PositiveInt,
@@ -61,12 +59,12 @@ def parse_device_type(manufacturer: Manufacturer, device_type: str) -> DeviceTyp
 
 class Device(BaseModel):
     hostname: str = Field(alias="Hostname")
-    management_ip: IPvAnyInterface = Field(alias="ManagementIP")
+    management_ip: IPv4Interface = Field(alias="ManagementIP")
     manufacturer: str = Field(alias="Manufacturer")
     device_type: DeviceType = Field(alias="DeviceType")
     device_role: DeviceRole = Field(alias="DeviceRole")
     serial_number: str | None = Field(default=None, alias="SerialNumber")
-    default_gateway: IPvAnyAddress | None = Field(default=None, alias="DefaultGateway")
+    default_gateway: IPv4Address | None = Field(default=None, alias="DefaultGateway")
     server_room: str | None = Field(default=None, alias="ServerRoom")
     stacked: bool = Field(default=False)
     interfaces: list["PhysicalInterface"] = Field(default=[])
@@ -93,7 +91,7 @@ class PhysicalInterface(BaseModel):
     if_mode: IfMode
     if_descr: str | None = None
     port_channel_descr: str | None = None
-    if_addr: IPvAnyInterface | None = None
+    if_addr: IPv4Interface | None = None
     vlan_id: int | None = None
     port_channel_id: PositiveInt | None = None
     dhcp_snooping_enable: bool = False

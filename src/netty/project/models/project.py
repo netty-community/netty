@@ -13,15 +13,13 @@ limitations under the License.
 """
 
 from typing import Literal
+from ipaddress import IPv4Interface, IPv4Address, IPv4Network
 
 from pydantic import (
     BaseModel,
     Field,
-    IPvAnyInterface,
-    IPvAnyNetwork,
     PositiveInt,
     model_validator,
-    IPvAnyAddress,
     computed_field
 )
 
@@ -30,13 +28,13 @@ type LoadBalanceMode = Literal["active-passive", "active-active"]
 
 
 class Project(BaseModel):
-    lan_gateway: IPvAnyAddress
+    lan_gateway: IPv4Address
     lan_networks: list["LanNetwork"] = Field(..., description="The LAN block of the site")
     wan_networks: "WanNetwork" = Field(..., description="The WAN networks of the site")
 
 
 class LanNetwork(BaseModel):
-    network: IPvAnyNetwork
+    network: IPv4Network
     enable_nat: bool = True
 
 
@@ -67,12 +65,12 @@ class WanNetworkConfig(BaseModel):
     pppoe_password: str | None = Field(
         None, description="The password of the WAN network"
     )
-    ip_address: IPvAnyInterface | None = Field(
+    ip_address: IPv4Interface | None = Field(
         default=None,
         description="The ip_address of the WAN network config on the router/firewall",
     )
     port_name: str = Field(..., description="the interface name connect to wan network")
-    gateway: IPvAnyAddress | None = Field(
+    gateway: IPv4Address | None = Field(
         default=None, description="The gateway of the WAN network"
     )
     ecmp_weight: PositiveInt = Field(
@@ -83,7 +81,7 @@ class WanNetworkConfig(BaseModel):
         default=10,
         description="The distance of route",
     )
-    probe_icmp_ping_target: IPvAnyAddress | None = Field(
+    probe_icmp_ping_target: IPv4Address | None = Field(
         default=None, description="sdwan health check target"
     )
 

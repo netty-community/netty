@@ -30,3 +30,29 @@ def wildcard_mask_to_netmask(wildcard_mask: str) -> str:
     wildcard_mask_int = int(ipaddress.IPv4Address(wildcard_mask))
     inverted_mask_int = ~wildcard_mask_int & 0xFFFFFFFF
     return str(ipaddress.IPv4Address(inverted_mask_int))
+
+
+def find_excluded_ranges(
+    network: ipaddress.IPv4Network,
+    start: ipaddress.IPv4Address,
+    end: ipaddress.IPv4Address,
+)->list[tuple[ipaddress.IPv4Address, ipaddress.IPv4Address]]:
+    """
+    Find all the excluded ranges in the network.
+    """
+    if start not in network:
+        raise ValueError(f"Start address {start} is not in the network")
+    if end not in network:
+        raise ValueError(f"End address {end} is not in the network")
+    if start > end:
+        end, start = start, end
+    
+    all_addresses = list(network.hosts())
+    start_index = all_addresses.index(start)
+    end_index = all_addresses.index(end) + 1
+    exclued_subnets = []
+    if start_index > 0:
+        exclued_subnets.append((all_addresses[0], all_addresses[start_index-1]))
+    if end_index < len(all_addresses):
+        exclued_subnets.append((all_addresses[end_index], all_addresses[-1]))
+    return exclued_subnets

@@ -24,37 +24,37 @@ class Platform(StrEnum):
     fortinet = "fortinet"
     paloalto = "paloalto"
 
-    @classmethod
-    def manufacturer(cls, platform: "Platform") -> "Manufacturer":
+    @property
+    def manufacturer(self) -> "Manufacturer":
         mapping = {
-            cls.cisco_xe: Manufacturer.cisco,
-            cls.cisco_nxos: Manufacturer.cisco,
-            cls.huawei_vrp: Manufacturer.huawei,
-            cls.ruijie_os: Manufacturer.ruijie,
-            cls.aruba_os: Manufacturer.aruba,
-            cls.fortinet: Manufacturer.fortinet,
-            cls.paloalto: Manufacturer.paloalto
+            Platform.cisco_xe: Manufacturer.cisco,
+            Platform.cisco_nxos: Manufacturer.cisco,
+            Platform.huawei_vrp: Manufacturer.huawei,
+            Platform.ruijie_os: Manufacturer.ruijie,
+            Platform.aruba_os: Manufacturer.aruba,
+            Platform.fortinet: Manufacturer.fortinet,
+            Platform.paloalto: Manufacturer.paloalto
         }
-        manufacturer = mapping.get(platform)
+        manufacturer = mapping.get(self)
         if manufacturer is None:
-            msg = f"Unknown platform: {platform}"
+            msg = f"Unknown platform: {self}"
             raise ValueError(msg)
         return manufacturer
     
-    @classmethod
-    def port_channel_prefix(cls, platform: "Platform")-> "PortChannelPrefix":
+    @property
+    def port_channel_prefix(self)-> "PortChannelPrefix":
         mapping = {
-            cls.cisco_xe: PortChannelPrefix.cisco,
-            cls.cisco_nxos: PortChannelPrefix.cisco,
-            cls.huawei_vrp: PortChannelPrefix.huawei,
-            cls.ruijie_os: PortChannelPrefix.ruijie,
-            cls.aruba_os: PortChannelPrefix.aruba,
-            cls.fortinet: PortChannelPrefix.fortinet,
-            cls.paloalto: PortChannelPrefix.paloalto
+            Platform.cisco_xe: PortChannelPrefix.cisco,
+            Platform.cisco_nxos: PortChannelPrefix.cisco,
+            Platform.huawei_vrp: PortChannelPrefix.huawei,
+            Platform.ruijie_os: PortChannelPrefix.ruijie,
+            Platform.aruba_os: PortChannelPrefix.aruba,
+            Platform.fortinet: PortChannelPrefix.fortinet,
+            Platform.paloalto: PortChannelPrefix.paloalto
         }
-        prefix = mapping.get(platform)
+        prefix = mapping.get(self)
         if prefix is None:
-            msg = f"Unknown platform: {platform}"
+            msg = f"Unknown platform: {self}"
             raise ValueError(msg)
         return prefix 
 
@@ -77,5 +77,5 @@ class PortChannelPrefix(StrEnum):
     huawei = "Eth"
     ruijie = "Agg"
     aruba = "Po"
-    fortinet = "agg"
+    fortinet = ""
     paloalto = "AE"

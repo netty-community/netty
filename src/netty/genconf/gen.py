@@ -11,8 +11,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from ipaddress import IPv4Address
 
-from pydantic import IPvAnyAddress
 
 from netty.project import (
     Device,
@@ -31,27 +31,27 @@ from netty.arch import (
     enable_if_dhcp_snooping_trust,
     enable_if_netflow_export,
 )
-from netty.confgen.factory.switch_factory import SwitchFactory
+from netty.genconf.factory.switch_factory import SwitchFactory
 from netty.consts import PROJECT_CONFIG
 from netty.project.config import settings
-from netty.confgen.dispatcher import get_switch_factory
-from netty.confgen.utils import (
+from netty.genconf.dispatcher import get_switch_factory
+from netty.genconf.utils import (
     remove_duplicate_devices,
     generate_default_gateway,
     remove_stack_ports,
 )
-from netty.utils.netif import generate_port_channel_name
+from netty.utils.netif import generate_port_channel_descr
 
 
-def __hostname_to_ip(devices: list[Device]) -> dict[str, IPvAnyAddress]:
-    hostname_to_ip: dict[str, IPvAnyAddress] = {
+def __hostname_to_ip(devices: list[Device]) -> dict[str, IPv4Address]:
+    hostname_to_ip: dict[str, IPv4Address] = {
         device.hostname: device.management_ip for device in devices
     }
     return hostname_to_ip
 
 
-def __ip_to_device(devices: list[Device]) -> dict[IPvAnyAddress, Device]:
-    ip_to_device: dict[IPvAnyAddress, Device] = {}
+def __ip_to_device(devices: list[Device]) -> dict[IPv4Address, Device]:
+    ip_to_device: dict[IPv4Address, Device] = {}
     unique_devices = remove_duplicate_devices(devices)
     for device in unique_devices:
         ip_to_device[device.management_ip] = device
@@ -86,17 +86,14 @@ def __link_connections_to_device(
                 PhysicalInterface(
                     if_name=connection.local_interface_name,
                     if_descr=connection.local_if_descr,
-                    port_channel_descr=generate_port_channel_name(
+                    port_channel_descr=generate_port_channel_descr(
                         connection.local_port_channel_descr,
-                        local_device.device_type.platform.port_channel_prefix(
-                            local_device.device_type.platform
-                        ),
+                        remote_device.device_type.platform.port_channel_prefix
                     ),
                     if_mode=local_if_mode,
                     enable_netflow=enable_if_netflow_export(
                         local_device.device_role,
-                        remote_device.device_role,
-                        bool(connection.local_port_channel_id),
+                        remote_device.device_role
                     ),
                     port_channel_id=connection.local_port_channel_id,
                     dhcp_snooping_enable=enable_if_dhcp_snooping(
@@ -115,17 +112,14 @@ def __link_connections_to_device(
                 PhysicalInterface(
                     if_name=connection.remote_interface_name,
                     if_descr=connection.remote_if_descr,
-                    port_channel_descr=generate_port_channel_name(
+                    port_channel_descr=generate_port_channel_descr(
                         connection.remote_port_channel_descr,
-                        remote_device.device_type.platform.port_channel_prefix(
-                            remote_device.device_type.platform
-                        ),
+                        local_device.device_type.platform.port_channel_prefix
                     ),
                     if_mode=remote_if_mode,
                     enable_netflow=enable_if_netflow_export(
                         remote_device.device_role,
                         local_device.device_role,
-                        bool(connection.remote_port_channel_id),
                     ),
                     port_channel_id=connection.remote_port_channel_id,
                     dhcp_snooping_enable=enable_if_dhcp_snooping(
@@ -147,11 +141,9 @@ def __link_connections_to_device(
                 PhysicalInterface(
                     if_name=connection.local_interface_name,
                     if_descr=connection.local_if_descr,
-                    port_channel_descr=generate_port_channel_name(
+                    port_channel_descr=generate_port_channel_descr(
                         connection.local_port_channel_descr,
-                        local_device.device_type.platform.port_channel_prefix(
-                            local_device.device_type.platform
-                        ),
+                        remote_device.device_type.platform.port_channel_prefix
                     ),
                     if_mode="access",
                     enable_netflow=False,  # Assuming no netflow for standalone firewall interface

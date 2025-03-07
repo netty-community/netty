@@ -11,13 +11,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from ipaddress import  IPv4Address, IPv4Interface, IPv4Network
 
 from pydantic import (
     BaseModel,
     Field,
-    IPvAnyAddress,
-    IPvAnyInterface,
-    IPvAnyNetwork,
     PositiveInt,
     model_validator,
 )
@@ -41,7 +39,7 @@ class Subnet(BaseModel):
     interface_name: str | None = Field(
         default=None, alias="InterfaceName", description="The interface name of the subnet"
     )
-    if_addr: IPvAnyInterface = Field(
+    if_addr: IPv4Interface = Field(
         ..., alias="IfAddress", description="The if_addr of the subnet"
     )
     vrf_name: str | None = Field(
@@ -51,16 +49,16 @@ class Subnet(BaseModel):
         default=False,
         description="Whether to enable dhcp pool, disable by default",
     )
-    dhcp_network: IPvAnyNetwork | None = Field(
+    dhcp_network: IPv4Network | None = Field(
         default=None, alias="DHCPNetwork", description="The network of the dhcp range"
     )
-    dhcp_range_start: IPvAnyAddress | None = Field(
+    dhcp_range_start: IPv4Address | None = Field(
         default=None, alias="DHCPRangeStart", description="The start of the dhcp range"
     )
-    dhcp_range_end: IPvAnyAddress | None = Field(
+    dhcp_range_end: IPv4Address | None = Field(
         default=None, alias="DHCPRangeEnd", description="The end of the dhcp range"
     )
-    dns_server: list[IPvAnyAddress] = Field(
+    dns_server: list[IPv4Address] = Field(
         default=[], alias="DNSServer", description="The domain name of the subnet"
     )
 
@@ -93,7 +91,7 @@ class Subnet(BaseModel):
                 "The dhcp pool ip version is not the same as the network ip version"
             )
 
-            def check_ip_version(ip: IPvAnyAddress) -> None:
+            def check_ip_version(ip: IPv4Address) -> None:
                 if ip.version != network_version:
                     raise ValueError(invalid_version_msg)
 
@@ -120,7 +118,7 @@ class Subnet(BaseModel):
 
 
 class FixedIP(BaseModel):
-    ip: IPvAnyInterface = Field(
+    ip: IPv4Interface = Field(
         ..., description="The fixed ip with netmask", alias="IPAddress"
     )
     mac_address: str = Field(

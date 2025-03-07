@@ -39,8 +39,7 @@ def generate_default_config_yaml(region: str):
             "firewall_manager": "101.126.153.88",
         },
         "snmp_config": {
-            "snmp_version": "v2c",
-            "snmp_community": "change_me_community",
+            "snmp_community": "public",
             "snmp_port": 161,
             "snmp_source": [],
         },

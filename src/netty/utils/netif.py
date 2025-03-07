@@ -67,13 +67,17 @@ def interfaces_have_same_sub_port_number(
     return False
 
 
-def generate_port_channel_name(
-    if_descr: str, port_channel_if_prefix: str
-) -> str:
+def generate_port_channel_descr(if_descr: str, port_channel_if_prefix: str) -> str:
     if if_descr == "":
         return ""
     parts = if_descr.split("_")
-    if len(parts) != 3:
+    if len(parts) == 4:
+        if parts[3] != "agg":
+            raise ValueError(
+                f"invalid hostname: {if_descr}, hostname should not contain `_`"
+            )
+        return f"to_{parts[1]}_{port_channel_if_prefix}{parts[2]}_{parts[3]}"
+    elif len(parts) != 3:
         raise ValueError(
             f"invalid hostname: {if_descr}, hostname should not contain `_`"
         )
