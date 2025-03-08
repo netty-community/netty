@@ -105,7 +105,6 @@ class SystemConfig(BaseModel):
     syslog_udp_port: int = Field(
         default=514, description="The syslog udp port of the device"
     )
-    max_line_vty: int = Field(default=15, description="The max line vty of the device")
     firewall_manager: IPv4Address = Field(
         default=IPv4Address("0.0.0.0"),  # noqa: S104
         description="The firewall manager of the device, like fortimanager for fortinet and panoroma for PaloAlto",

@@ -197,21 +197,7 @@ class Subnetter:
             f.write("VlanId,VlanName,DHCPNetwork,DHCPPool,DHCPPoolRangeStart,DHCPPoolRangeEnd,IfAddress\n")
             for r in results:
                 dns = ",".join([i.compressed for i in r.dns_server])
-                f.write(f"{r.vlan_id},{r.name},{r.dhcp_network},{r.dhcp_pool},{dns},{r.dhcp_range_start},{r.dhcp_range_end},{r.if_addr}\n")
-        
-            
-
-a = Subnetter(
-    "10.0.0.0/19",
-    site_code="CNPEK01",
-    num_wired_endpoints=500,
-    num_wireless_aps=100,
-)
-result = a.allocate()
-for r in result:
-     print(f"VLAN {r.vlan_id}: {r.if_addr}")
-    
-    
+                f.write(f"{r.vlan_id},{r.name},{r.dhcp_network},{r.dhcp_pool},{dns},{r.dhcp_range_start},{r.dhcp_range_end},{r.if_addr}\n")    
 
     
 

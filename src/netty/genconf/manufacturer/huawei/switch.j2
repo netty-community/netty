@@ -366,12 +366,12 @@ interface {{interface.if_name}}
 {%endfor%}
 {%-endif%}
 
-user-interface maximum-vty {{switch.system_config.max_line_vty}}
+user-interface maximum-vty 15
 user-interface con 0
     authentication-mode password
     set authentication password cipher {{switch.management_password}}
     idle-timeout 5 0
-user-interface vty 0 {{switch.system_config.max_line_vty-1}}                  
+user-interface vty 0 15                  
     authentication-mode local
     idle-timeout 10 0
 

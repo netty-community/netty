@@ -35,8 +35,7 @@ def generate_default_config_yaml(region: str):
             "ntp_server": [r.compressed for r in get_default_ntp_server(region=region)],
             "syslog_server": "",
             "syslog_udp_port": 514,
-            "max_line_vty": 15,
-            "firewall_manager": "101.126.153.88",
+            "firewall_manager": "100.100.100.100",
         },
         "snmp_config": {
             "snmp_community": "public",

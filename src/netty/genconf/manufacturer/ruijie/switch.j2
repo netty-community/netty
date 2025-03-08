@@ -282,7 +282,7 @@ interface {{interface.if_name}}
 line console 0
     password {{switch.system_config.management_password}}
     exec-timeout 15 0
-line vty 0 {{switch.system_config.max_line_vty}}
+line vty 0 15
     transport input ssh
     exec-timeout 15 0
     login authentication default
