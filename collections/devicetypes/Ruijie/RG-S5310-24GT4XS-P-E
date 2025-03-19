@@ -1,0 +1,73 @@
+---
+platform: ruijie_os
+name: RG-S5310-24GT4XS-P-E
+u_height: 1
+power_consumption: 40
+poe_support: false
+product_family: switch
+interfaces:
+  - name: Gi0/1
+    type: 1000base-t
+  - name: Gi0/2
+    type: 1000base-t
+  - name: Gi0/3
+    type: 1000base-t
+  - name: Gi0/4
+    type: 1000base-t
+  - name: Gi0/5
+    type: 1000base-t
+  - name: Gi0/6
+    type: 1000base-t
+  - name: Gi0/7
+    type: 1000base-t
+  - name: Gi0/8
+    type: 1000base-t
+  - name: Gi0/9
+    type: 1000base-t
+  - name: Gi0/10
+    type: 1000base-t
+  - name: Gi0/11
+    type: 1000base-t
+  - name: Gi0/12
+    type: 1000base-t
+  - name: Gi0/13
+    type: 1000base-t
+  - name: Gi0/14
+    type: 1000base-t
+  - name: Gi0/15
+    type: 1000base-t
+  - name: Gi0/16
+    type: 1000base-t
+  - name: Gi0/17
+    type: 1000base-t
+  - name: Gi0/18
+    type: 1000base-t
+  - name: Gi0/19
+    type: 1000base-t
+  - name: Gi0/20
+    type: 1000base-t
+  - name: Gi0/21
+    type: 1000base-t
+  - name: Gi0/22
+    type: 1000base-t
+  - name: Gi0/23
+    type: 1000base-t
+  - name: Gi0/24
+    type: 1000base-t
+  - name: Te0/25
+    type: 10gbase-x-sfpp
+  - name: Te0/26
+    type: 10gbase-x-sfpp
+  - name: Te0/27
+    type: 10gbase-x-sfpp
+  - name: Te0/28
+    type: 10gbase-x-sfpp
+stack_interfaces:
+  - Te0/27
+  - Te0/28
+uplink_interfaces:
+  - Te0/25
+  - Te0/26
+  - Gi0/24
+  - Gi0/23
+mad_interface: Gi0/24
