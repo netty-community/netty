@@ -28,12 +28,12 @@ class Connection(BaseModel):
     if_type: InterfaceType = Field(
         default=InterfaceType.base_1000_t, alias="InterfaceType"
     )
-    local_port_channel_id: PositiveInt | None = Field(
+    local_port_channel_id: PositiveInt| str | None = Field(
         default=None, alias="LocalPortChannelId"
     )
     remote_hostname: str = Field(alias="RemoteHostname")
     remote_interface_name: str = Field(alias="RemoteInterfaceName")
-    remote_port_channel_id: PositiveInt | None = Field(
+    remote_port_channel_id: PositiveInt | str | None = Field(
         default=None, alias="RemotePortChannelId"
     )
 
@@ -46,7 +46,9 @@ class Connection(BaseModel):
     @computed_field
     @property
     def local_if_descr(self) -> str:
-        return f"to_{self.remote_hostname}_{self.remote_interface_name}".replace(" ", "")
+        return f"to_{self.remote_hostname}_{self.remote_interface_name}".replace(
+            " ", ""
+        )
 
     @computed_field
     @property

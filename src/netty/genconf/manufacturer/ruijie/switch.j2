@@ -57,6 +57,10 @@ ip ssh key-exchange dh_group_exchange_sha1 dh_group14_sha1 ecdh_sha2_nistp256 ec
 ip ssh cipher-mode ctr gcm
 ip ssh hmac-algorithm sha2-256 sha2-512
 ip ssh version 2
+crypto key generate ecc
+
+yes
+
 enable service ssh-server
 enable service snmp-agent
 errdisable recover interval 300
@@ -265,16 +269,20 @@ interface {{interface.if_name}}
     switchport mode trunk
     switchport trunk allow vlan all
 {%else%}
-    switch mode access
-    switch access vlan {{interface.vlan_id}}
+    switchport mode access
+    switchport access vlan {{interface.vlan_id}}
 {%endif%}
 {%if interface.dhcp_snooping_trust%}
     ip dhcp snooping trust
 {%endif%}
 {%if interface.portfast%}
+    switchport protected
     spanning-tree portfast
     spanning-tree bpduguard enable
     rldp port loop-detect shutdown-port
+    switchport port-security maximum 2
+    switchport port-security violation restrict
+    switchport port-security
 {%endif%}
 {%endfor%}
 {%- endif %}

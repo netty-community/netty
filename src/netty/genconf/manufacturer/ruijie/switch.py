@@ -29,14 +29,31 @@ class RuijieSwitch(SwitchFactory):
     )
     default_jinja_template_name: ClassVar[str] = "switch.j2"
 
-    def enrich_data(self) -> Switch:
+    def handle_dhcp_pool_range(self) -> list[DHCPPool]:
         pools = self.get_dhcp_pool_list()
-        stp_role, stp_pri = self.device.device_role.stp_root
         for pool in pools:
             if not pool.fixed_ips:
-                continue
-            for ip in pool.fixed_ips:
-                ip.mac_address = MacAddress(ip.mac_address).ruijie_format
+                pass
+            else:
+                for ip in pool.fixed_ips:
+                    ip.mac_address = MacAddress(ip.mac_address).cisco_format
+            if pool.dhcp_pool_range_start and pool.dhcp_pool_range_end:
+                exclude_ranges = find_excluded_ranges(
+                    pool.dhcp_pool_network,
+                    pool.dhcp_pool_range_start,
+                    pool.dhcp_pool_range_end,
+                )
+                pool.exclude_ranges = [
+                    DHCPExcludeRange(
+                        range_start=exclude_range[0], range_end=exclude_range[1]
+                    )
+                    for exclude_range in exclude_ranges
+                ]
+        return pools
+
+    def enrich_data(self) -> Switch:
+        stp_role, stp_pri = self.device.device_role.stp_root
+        pools = self.handle_dhcp_pool_range()
 
         vlans = self.get_vlan_list()
         vlan_ifs = self.get_vlan_if_list()

@@ -81,7 +81,7 @@ class DHCPPool:
 
 @dataclass
 class PortChannel:
-    port_channel_id: int
+    port_channel_id: int | str
     if_mode: IfMode
     if_descr: str | None = None
     vlan_id: int | None = None
@@ -259,6 +259,8 @@ class SwitchFactory:
                     )
                 )
                 unique_port_channels.append(interface.port_channel_id)
+                if interface.enable_netflow:
+                    interface.enable_netflow = False
         return results
 
     def enrich_data(self) -> Switch:

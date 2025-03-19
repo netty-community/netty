@@ -183,7 +183,7 @@ snmp-agent
 snmp-agent community read cipher {{switch.snmp_config.snmp_community}} mib-view iso-view {%if switch.snmp_config.snmp_source_address%} acl 2999 {%endif%}
 snmp-agent sys-info version v2c
 snmp-agent mib-view included iso-view iso
-snmp-agent protocol source-status Vlanif {{switch.system_config.management_vlan}}
+snmp-agent protocol source-interface Vlanif {{switch.system_config.management_vlan}}
 {%if switch.snmp_config.enable_trap-%}
 snmp-agent enable traps
 snmp-agent host {{switch.snmp_config.snmp_trap_server.compressed}} traps {{switch.snmp_config.snmp_trap_password}}
@@ -260,10 +260,13 @@ vlan {{v.vlan_id}}
 
 {%if switch.vlan_ifs-%}
 {%for vlan_if in switch.vlan_ifs%}
-interface vlan {{vlan_if.vlan_id}}
+interface Vlanif{{vlan_if.vlan_id}}
     ip address {{vlan_if.gateway.ip.compressed}} {{vlan_if.network.netmask}}
 {%if vlan_if.vlan_name%}
     description {{vlan_if.vlan_name}}
+{%endif%}
+{%if vlan_if.enable_dhcp%}
+    dhcp select global
 {%endif%}
 {%if 'guest' in vlan_if.vlan_name.lower() and switch.enable_guest_acl%}
     traffic-filter Guest-vlan300 inbound
@@ -297,10 +300,11 @@ interface {{interface.if_name}}
 {%if switch.port_channels-%}
 {%for port in switch.port_channels%}
 interface Eth-trunk {{port.port_channel_id}}
+    mode lacp
 {%if port.if_descr%}
-    description {{interface.if_descr}}
+    description {{port.if_descr}}
 {%endif%}
-{% if interface.enable_netflow%}
+{% if port.enable_netflow%}
     {%if switch.flow_type == "sflow"%}
     sflow sampling collector 1
     sflow sampling rate {{switch.netflow_config.flow_sample_rate}}
@@ -316,7 +320,7 @@ interface Eth-trunk {{port.port_channel_id}}
 {%endif%}
 {%if port.if_mode=="trunk"%}
     port link-type trunk
-    port trunk allow vlan all
+    port trunk allow-pass vlan all
 {%else%}
     port link-type access
     port default vlan {{port.vlan_id}}
@@ -348,10 +352,10 @@ interface {{interface.if_name}}
     {%endif%}
 {%endif%}
 {% if interface.port_channel_id %}
-    port-group {{interface.port_channel_id}} mode active
+   eth-trunk {{interface.port_channel_id}}
 {%elif interface.if_mode=="trunk"%}
     port link-type trunk
-    port trunk allow vlan all
+    port trunk allow-pass vlan all
 {%else%}
     port link-type access
     port default vlan {{interface.vlan_id}}
