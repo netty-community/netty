@@ -66,14 +66,13 @@ interfaces:
   - name: x4
     type: 10gbase-x-sfpp
 ha_ports:
-  - port11
-  - port12
+  - port15
+  - port16
+lan_ports:
   - x1
   - x2
-lan_ports:
-  - port9
-  - port10
-enhance_ha_port: x1
+enhance_ha_port: x3
 uplink_interfaces:
-  - wan1
-  - wan2
+  - port1
+  - port2
+oobm_interfaces: mgmt
