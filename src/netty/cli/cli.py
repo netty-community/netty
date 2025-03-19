@@ -44,6 +44,7 @@ def new(
         site_code: the site_code of project
         country_code: the country_code of project, default is CN, can be CN or US or any other country code
     """
+    typer.echo(f"[netty]: create project {corp_name}-{site_code} with country code {country_code} in projects directory")
     project_dir = PROJECT_DIR / "projects" / corp_name / site_code
 
     if replace_project_config:
@@ -65,14 +66,17 @@ def new(
     for filename, content in files_to_create.items():
         file_path = project_dir / filename
         if not file_path.exists():
+            typer.echo(f"[netty]: create configuration file {file_path}")
             with file_path.open("w", newline="", encoding="utf-8-sig") as f:
                 yaml.safe_dump(content, f, indent=4, sort_keys=False)
-
     path=Path(DEFAULT_NETWORK_TEMPLATE_PATH)
     if not path.exists():
+        typer.echo(f"[netty]: create network design template file {DEFAULT_NETWORK_TEMPLATE_PATH}")
         gen_template_xlsx(country_code, project_dir/TemplateName.xlsx_file)
     configuration_dir = project_dir / "configuration"
     configuration_dir.mkdir(parents=True, exist_ok=True)
+    typer.echo(f"[netty]: create configuration directory {configuration_dir}")
+    typer.echo("[netty]: project initialized")
 
 
 @app.command()

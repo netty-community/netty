@@ -146,3 +146,27 @@ class Link:
         mxPoint = ET.SubElement(mxGeometry, "mxPoint")
         mxPoint.set("as", "offset")
         return mxCell
+
+@dataclass
+class RackUnit:
+    rack_name: str
+    hostname: str
+    u_position: int
+    u_height: int
+
+    def to_xml(self) -> ET.Element:
+        mxCell = ET.Element(
+            "mxCell",
+            id=self.hostname,
+            value=self.hostname,
+            style="shape=mxgraph.aws3.rack;whiteSpace=wrap;html=1;align=center;verticalAlign=top;spacingTop=0;spacingLeft=0;spacingRight=0;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;size=80;points=[];collapsible=0;connectable=0;container=1;recursiveResize=0;",
+            vertex="1",
+            parent=self.rack_name,
+        )
+        mxGeometry = ET.SubElement(
+            mxCell, "mxGeometry", width="80", height="80",
+        )
+        mxGeometry.set("as", "geometry")
+        mxGeometry.set("x", "0")
+        mxGeometry.set("y", str(self.u_position * 80))
+        return mxCell

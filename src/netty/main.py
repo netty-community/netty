@@ -7,7 +7,7 @@ from netty.project.file_parser import (
     enrich_devices_and_connections
 )
 from netty.genconf.gen import config_generator
-from netty.gentopo.gen import topology_generator
+from netty.gentopo.topogen import topology_generator
 
 logger = logging.getLogger(__name__)
 
