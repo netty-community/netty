@@ -15,13 +15,7 @@ limitations under the License.
 from typing import Literal
 from ipaddress import IPv4Interface, IPv4Address, IPv4Network
 
-from pydantic import (
-    BaseModel,
-    Field,
-    PositiveInt,
-    model_validator,
-    computed_field
-)
+from pydantic import BaseModel, Field, PositiveInt, model_validator, computed_field
 
 type CircuitType = Literal["Internet", "ADSL", "MPLS", "P2P"]
 type LoadBalanceMode = Literal["active-passive", "active-active"]
@@ -29,7 +23,9 @@ type LoadBalanceMode = Literal["active-passive", "active-active"]
 
 class Project(BaseModel):
     lan_gateway: IPv4Address
-    lan_networks: list["LanNetwork"] = Field(..., description="The LAN block of the site")
+    lan_networks: list["LanNetwork"] = Field(
+        ..., description="The LAN block of the site"
+    )
     wan_networks: "WanNetwork" = Field(..., description="The WAN networks of the site")
 
 
@@ -46,13 +42,11 @@ class WanNetwork(BaseModel):
 
     @computed_field
     @property
-    def wan_member_ports_str(self)->str:
+    def wan_member_ports_str(self) -> str:
         wan_str = ""
         for wan in self.networks:
             wan_str += f'"{wan.port_name}" '
         return wan_str
-    
-
 
 
 class WanNetworkConfig(BaseModel):
@@ -99,4 +93,3 @@ class WanNetworkConfig(BaseModel):
                 "ADSL WAN network must have pppoe_username and pppoe_password"
             )
         return self
-

@@ -33,16 +33,16 @@ class Platform(StrEnum):
             Platform.ruijie_os: Manufacturer.ruijie,
             Platform.aruba_os: Manufacturer.aruba,
             Platform.fortinet: Manufacturer.fortinet,
-            Platform.paloalto: Manufacturer.paloalto
+            Platform.paloalto: Manufacturer.paloalto,
         }
         manufacturer = mapping.get(self)
         if manufacturer is None:
             msg = f"Unknown platform: {self}"
             raise ValueError(msg)
         return manufacturer
-    
+
     @property
-    def port_channel_prefix(self)-> "PortChannelPrefix":
+    def port_channel_prefix(self) -> "PortChannelPrefix":
         mapping = {
             Platform.cisco_xe: PortChannelPrefix.cisco,
             Platform.cisco_nxos: PortChannelPrefix.cisco,
@@ -50,20 +50,20 @@ class Platform(StrEnum):
             Platform.ruijie_os: PortChannelPrefix.ruijie,
             Platform.aruba_os: PortChannelPrefix.aruba,
             Platform.fortinet: PortChannelPrefix.fortinet,
-            Platform.paloalto: PortChannelPrefix.paloalto
+            Platform.paloalto: PortChannelPrefix.paloalto,
         }
         prefix = mapping.get(self)
         if prefix is None:
             msg = f"Unknown platform: {self}"
             raise ValueError(msg)
-        return prefix 
+        return prefix
 
 
 class Manufacturer(StrEnum):
     cisco = "Cisco"
     huawei = "Huawei"
     ruijie = "Ruijie"
-    aruba = "HPE"
+    aruba = "HOPE"
     fortinet = "Fortinet"
     paloalto = "PaloAlto"
 

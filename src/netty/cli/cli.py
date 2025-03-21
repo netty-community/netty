@@ -31,7 +31,6 @@ logger = logging.getLogger(__name__)
 app = typer.Typer()
 
 
-
 @app.command(help="create a new project, initial config files")
 def new(
     corp_name: str,
@@ -40,11 +39,13 @@ def new(
     replace_project_config: bool = True,
 ) -> None:
     """Generate project.config.yaml if replace_project_config is True and initialize project in projects directory.
-        corp_name: the corp name of project
-        site_code: the site_code of project
-        country_code: the country_code of project, default is CN, can be CN or US or any other country code
+    corp_name: the corp name of project
+    site_code: the site_code of project
+    country_code: the country_code of project, default is CN, can be CN or US or any other country code
     """
-    typer.echo(f"[netty]: create project {corp_name}-{site_code} with country code {country_code} in projects directory")
+    typer.echo(
+        f"[netty]: create project {corp_name}-{site_code} with country code {country_code} in projects directory"
+    )
     project_dir = PROJECT_DIR / "projects" / corp_name / site_code
 
     if replace_project_config:
@@ -69,10 +70,12 @@ def new(
             typer.echo(f"[netty]: create configuration file {file_path}")
             with file_path.open("w", newline="", encoding="utf-8-sig") as f:
                 yaml.safe_dump(content, f, indent=4, sort_keys=False)
-    path=Path(DEFAULT_NETWORK_TEMPLATE_PATH)
+    path = Path(DEFAULT_NETWORK_TEMPLATE_PATH)
     if not path.exists():
-        typer.echo(f"[netty]: create network design template file {DEFAULT_NETWORK_TEMPLATE_PATH}")
-        gen_template_xlsx(country_code, project_dir/TemplateName.xlsx_file)
+        typer.echo(
+            f"[netty]: create network design template file {DEFAULT_NETWORK_TEMPLATE_PATH}"
+        )
+        gen_template_xlsx(country_code, project_dir / TemplateName.xlsx_file)
     configuration_dir = project_dir / "configuration"
     configuration_dir.mkdir(parents=True, exist_ok=True)
     typer.echo(f"[netty]: create configuration directory {configuration_dir}")

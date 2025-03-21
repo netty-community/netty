@@ -60,10 +60,12 @@ class VlanIf:
     vrf_name: str | None = None
     enable_dhcp: bool = False
 
+
 @dataclass
 class DHCPExcludeRange:
     range_start: IPv4Address
     range_end: IPv4Address
+
 
 @dataclass
 class DHCPPool:

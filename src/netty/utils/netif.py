@@ -84,8 +84,8 @@ def generate_port_channel_descr(if_descr: str, port_channel_if_prefix: str) -> s
     return f"to_{parts[1]}_{port_channel_if_prefix}{parts[2]}"
 
 
-def match_interface_by_port_id(port_list: set[str], port_id: int)->str:
-    port_pattern = re.compile(r'(\d+)$')
+def match_interface_by_port_id(port_list: set[str], port_id: int) -> str:
+    port_pattern = re.compile(r"(\d+)$")
 
     port_map = {}
     for port in port_list:
@@ -96,4 +96,3 @@ def match_interface_by_port_id(port_list: set[str], port_id: int)->str:
     if port_id not in port_map:
         raise ValueError(f"port {port_id} not found in port list {port_list}")
     return port_map[port_id]
-

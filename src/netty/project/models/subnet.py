@@ -11,7 +11,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from ipaddress import  IPv4Address, IPv4Interface, IPv4Network
+
+from ipaddress import IPv4Address, IPv4Interface, IPv4Network
 
 from pydantic import (
     BaseModel,
@@ -37,7 +38,9 @@ class Subnet(BaseModel):
         description="The vlan name/interface description of the subnet",
     )
     interface_name: str | None = Field(
-        default=None, alias="InterfaceName", description="The interface name of the subnet"
+        default=None,
+        alias="InterfaceName",
+        description="The interface name of the subnet",
     )
     if_addr: IPv4Interface = Field(
         ..., alias="IfAddress", description="The if_addr of the subnet"

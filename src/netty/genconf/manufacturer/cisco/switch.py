@@ -17,7 +17,13 @@ from pathlib import Path
 
 from jinja2 import Template
 
-from netty.genconf.factory.switch_factory import Switch, SwitchFactory, Stp, DHCPPool, DHCPExcludeRange
+from netty.genconf.factory.switch_factory import (
+    Switch,
+    SwitchFactory,
+    Stp,
+    DHCPPool,
+    DHCPExcludeRange,
+)
 from netty.utils.mac import MacAddress
 from netty.utils.file import load_jinja2_template
 from netty.consts import PROJECT_DIR
@@ -41,7 +47,8 @@ class CiscoSwitch(SwitchFactory):
             if pool.dhcp_pool_range_start and pool.dhcp_pool_range_end:
                 exclude_ranges = find_excluded_ranges(
                     pool.dhcp_pool_network,
-                    pool.dhcp_pool_range_start, pool.dhcp_pool_range_end
+                    pool.dhcp_pool_range_start,
+                    pool.dhcp_pool_range_end,
                 )
                 pool.exclude_ranges = [
                     DHCPExcludeRange(range_start=ex[0], range_end=ex[1])

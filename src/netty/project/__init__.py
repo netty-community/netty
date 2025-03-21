@@ -35,5 +35,5 @@ __all__ = (
     "WebFilter",
     "UrlFilterEntry",
     "parse_project_info",
-    "parse_network_data"
+    "parse_network_data",
 )

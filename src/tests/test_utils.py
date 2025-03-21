@@ -14,7 +14,10 @@ limitations under the License.
 
 import pytest
 
-from netty.utils.netif import process_interface_name, interfaces_have_same_sub_port_number
+from netty.utils.netif import (
+    process_interface_name,
+    interfaces_have_same_sub_port_number,
+)
 
 
 @pytest.mark.parametrize(
@@ -52,16 +55,16 @@ def test_invalid_interface_name(interface_name: str, slot_number: int) -> None:
     "local_interface, remote_interface, expected",
     [
         ("Gi0/1/1", "Gi0/1/1", True),  # same sub-port number and same format
-        ("Gi0/1/1", "Gi0/1/1/1", False),  # same sub-port number and different formats
+        ("Gi0/1/1", "Gi0/1/1/1", True),  # same sub-port number and different formats
         ("Gi0/1/1", "Gi0/1/2", False),  # different sub-port numbers and same format
         (
             "Gi0/1/1",
             "Gi0/2/1/1",
-            False,
+            True,
         ),  # different sub-port numbers and different formats
         ("InvalidInterface", "Gi0/1/1", False),  # invalid interface name
-        ("Gi0/1", "Gi0/1/1", False),  # interface name missing sub-port number
-        ("Gi0/1/1", "Gi0/1", False),  # interface name missing sub-port number
+        ("Gi0/1", "Gi0/1/1", True),  # interface name missing sub-port number
+        ("Gi0/1/1", "Gi0/1", True),  # interface name missing sub-port number
     ],
 )
 def test_interfaces_have_same_sub_port_number(

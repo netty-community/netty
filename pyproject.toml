@@ -32,6 +32,8 @@ managed = true
 dev-dependencies = [
     "ruff>=0.9.3",
     "pytest>=8.3.4",
+    "pre-commit>=4.2.0",
+    "pytest-cov>=6.0.0",
 ]
 
 [tool.hatch.metadata]
@@ -39,3 +41,10 @@ allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/netty"]
+
+
+[tool.pytest.ini_options]
+addopts = "--cov-report term --cov-config=.coveragerc -W ignore:DeprecationWarning --cov=src -v"
+xfail_strict = true
+asyncio_mode = "auto"
+testpaths = ["src/tests"]

@@ -12,3 +12,4 @@ wheels/
 # network project files
 projects/
 project.config.yaml
+.coverage

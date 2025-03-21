@@ -19,19 +19,29 @@ bcrypt==4.2.1
 cffi==1.17.1
     # via cryptography
     # via pynacl
+cfgv==3.4.0
+    # via pre-commit
 click==8.1.8
     # via typer
     # via uvicorn
+coverage==7.7.0
+    # via pytest-cov
 cryptography==44.0.1
     # via paramiko
+distlib==0.3.9
+    # via virtualenv
 et-xmlfile==2.0.0
     # via openpyxl
 fastapi==0.115.11
     # via netty
+filelock==3.18.0
+    # via virtualenv
 future==1.0.0
     # via textfsm
 h11==0.14.0
     # via uvicorn
+identify==2.6.9
+    # via pre-commit
 idna==3.10
     # via anyio
 iniconfig==2.0.0
@@ -46,6 +56,8 @@ mdurl==0.1.2
     # via markdown-it-py
 netmiko==4.5.0
     # via netty
+nodeenv==1.9.1
+    # via pre-commit
 ntc-templates==7.7.0
     # via netmiko
 openpyxl==3.1.5
@@ -55,8 +67,11 @@ packaging==24.2
 paramiko==3.5.1
     # via netmiko
     # via scp
+platformdirs==4.3.7
+    # via virtualenv
 pluggy==1.5.0
     # via pytest
+pre-commit==4.2.0
 pycparser==2.22
     # via cffi
 pydantic==2.10.5
@@ -77,6 +92,8 @@ pynacl==1.5.0
 pyserial==3.5
     # via netmiko
 pytest==8.3.4
+    # via pytest-cov
+pytest-cov==6.0.0
 python-dotenv==1.0.1
     # via pydantic-settings
 python-multipart==0.0.20
@@ -84,6 +101,7 @@ python-multipart==0.0.20
 pyyaml==6.0.2
     # via netmiko
     # via netty
+    # via pre-commit
 rich==13.9.4
     # via netmiko
     # via typer
@@ -120,3 +138,5 @@ tzdata==2025.1
     # via netty
 uvicorn==0.34.0
     # via netty
+virtualenv==20.29.3
+    # via pre-commit

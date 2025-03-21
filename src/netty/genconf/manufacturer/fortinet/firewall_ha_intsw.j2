@@ -132,7 +132,7 @@ config system interface
         set role wan
         set interface "{{firewall.default_wan_agg_port_name}}"
         set vlanid {{(index+1)*100}}
-        
+
     next
 end
     {%elif wan.pppoe_username and wan.pppoe_password %}
@@ -244,5 +244,3 @@ config firewall policy
         set nat enable
     next
 end
-
-    

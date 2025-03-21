@@ -11,6 +11,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from ipaddress import IPv4Address
 
 
@@ -88,12 +89,11 @@ def __link_connections_to_device(
                     if_descr=connection.local_if_descr,
                     port_channel_descr=generate_port_channel_descr(
                         connection.local_port_channel_descr,
-                        remote_device.device_type.platform.port_channel_prefix
+                        remote_device.device_type.platform.port_channel_prefix,
                     ),
                     if_mode=local_if_mode,
                     enable_netflow=enable_if_netflow_export(
-                        local_device.device_role,
-                        remote_device.device_role
+                        local_device.device_role, remote_device.device_role
                     ),
                     port_channel_id=connection.local_port_channel_id,
                     dhcp_snooping_enable=enable_if_dhcp_snooping(
@@ -114,7 +114,7 @@ def __link_connections_to_device(
                     if_descr=connection.remote_if_descr,
                     port_channel_descr=generate_port_channel_descr(
                         connection.remote_port_channel_descr,
-                        local_device.device_type.platform.port_channel_prefix
+                        local_device.device_type.platform.port_channel_prefix,
                     ),
                     if_mode=remote_if_mode,
                     enable_netflow=enable_if_netflow_export(
@@ -143,7 +143,7 @@ def __link_connections_to_device(
                     if_descr=connection.local_if_descr,
                     port_channel_descr=generate_port_channel_descr(
                         connection.local_port_channel_descr,
-                        remote_device.device_type.platform.port_channel_prefix
+                        remote_device.device_type.platform.port_channel_prefix,
                     ),
                     if_mode="access",
                     enable_netflow=False,  # Assuming no netflow for standalone firewall interface
@@ -196,7 +196,13 @@ def _switch_gen(
 def _firewall_gen(device: Device, project_info: Project): ...
 
 
-def config_generator(devices: list[Device], connections: list[Connection], subnets: list[Subnet], fix_ips: list[FixedIP], project_info: Project) -> None:
+def config_generator(
+    devices: list[Device],
+    connections: list[Connection],
+    subnets: list[Subnet],
+    fix_ips: list[FixedIP],
+    project_info: Project,
+) -> None:
     if connections:
         connections, devices = remove_stack_ports(devices, connections)
         devices = __link_connections_to_device(devices, connections)

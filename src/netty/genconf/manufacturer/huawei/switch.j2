@@ -16,7 +16,7 @@ interface stack-port 0/2
 interface {{switch.stack_config.mad_ports[1]}}
     description to_MAD_port
     mad detect mode direct
-stack slot renumber 1 
+stack slot renumber 1
 {%- endif %}
 
 --------DO NOT COPY THIS LINE: switch configuration start--------
@@ -25,7 +25,7 @@ lldp enable
 dhcp snooping enable
 stelnet server enable
 snmp agent
-error-down auto-recovery cause bpdu-protection interval 300 
+error-down auto-recovery cause bpdu-protection interval 300
 error-down auto-recovery cause error-statistics interval 300
 error-down auto-recovery cause port-security interval 300
 error-down auto-recovery cause mac-address-flapping interval 300
@@ -47,7 +47,7 @@ sysname {{switch.hostname}}
 header login information "
 {{switch.baseline_config.default_banner}}"
 {% if switch.enable_guest_acl -%}
-acl name Guest-vlan300-deny 3996          
+acl name Guest-vlan300-deny 3996
     rule 10 permit udp destination any destination-port eq dns
     rule 15 permit tcp destination any destination-port eq dns
     rule 20 permit udp destination any destination-port eq bootpc
@@ -134,7 +134,7 @@ hwtacacs-server template tacacs
     hwtacacs-server timer response-timeout 3
     undo hwtacacs-server user-name domain-included
 aaa
-authentication-scheme tacacs             
+authentication-scheme tacacs
     authentication-mode hwtacacs local
     authorization-scheme tacacs
     authorization-mode hwtacacs local
@@ -147,7 +147,7 @@ accounting-scheme tacacs
 recording-mode hwtacacs tacacs
     cmd recording-scheme tacacs
     outbound recording-scheme tacacs
-    system recording-scheme tacacs          
+    system recording-scheme tacacs
 domain rd
     authentication-scheme tacacs
     accounting-scheme tacacs
@@ -375,7 +375,7 @@ user-interface con 0
     authentication-mode password
     set authentication password cipher {{switch.management_password}}
     idle-timeout 5 0
-user-interface vty 0 15                  
+user-interface vty 0 15
     authentication-mode local
     idle-timeout 10 0
 

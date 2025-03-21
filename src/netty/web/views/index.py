@@ -1,4 +1,3 @@
-
 from fastapi.responses import HTMLResponse
 from fastapi import APIRouter
 from fastapi.templating import Jinja2Templates
@@ -17,15 +16,14 @@ async def index(request: Request) -> HTMLResponse:
         {
             "name": "FQDN Address Group Generation",
             "description": "Generate FQDN address group configuration",
-            "url": "/tools/fqdn-address-group"
+            "url": "/tools/fqdn-address-group",
         },
         {
             "name": "IP Address Group Generation",
             "description": "Generate IP address group configuration",
-            "url": "/tools/ip-address-group"
-        }
+            "url": "/tools/ip-address-group",
+        },
     ]
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "tools": tools}
+        "index.html", {"request": request, "tools": tools}
     )

@@ -63,7 +63,6 @@ class ZtpConfPush:
         if self.session:
             self.session.disconnect()
 
-
     def push_config(self, config: str) -> None:
         if self.session:
             self.session.send_config_set(config.splitlines())

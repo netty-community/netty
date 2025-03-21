@@ -1,6 +1,6 @@
 # Netty Network Automation Tool
 ## Introduction
-This project aims to automate the generation of network device configurations and network topology diagrams using Draw.io XML files based on network device tables, interconnection tables, and subnet planning tables. It provides a streamlined and efficient way to manage and visualize network configurations and topologies. 
+This project aims to automate the generation of network device configurations and network topology diagrams using Draw.io XML files based on network device tables, interconnection tables, and subnet planning tables. It provides a streamlined and efficient way to manage and visualize network configurations and topologies.
 
 It's only aims to provide support for highly standard network architecture, such as traditional L3 network, `core_switch/access_switch`, `core_switch/distribution_switch/access_switch` and uplink to firewall/router/internet_switch for multiple ISP providers.
 

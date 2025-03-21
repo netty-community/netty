@@ -1,0 +1,10 @@
+[files]
+extend-exclude = [
+    "*.json",
+    "*.j2",
+    "*.jinja2"
+]
+[default]
+extend-ignore-identifiers-re = [
+    "selectin",
+]

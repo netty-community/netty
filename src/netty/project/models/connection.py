@@ -28,7 +28,7 @@ class Connection(BaseModel):
     if_type: InterfaceType = Field(
         default=InterfaceType.base_1000_t, alias="InterfaceType"
     )
-    local_port_channel_id: PositiveInt| str | None = Field(
+    local_port_channel_id: PositiveInt | str | None = Field(
         default=None, alias="LocalPortChannelId"
     )
     remote_hostname: str = Field(alias="RemoteHostname")

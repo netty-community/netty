@@ -24,7 +24,7 @@ def generate_default_config_yaml(region: str):
             "enable_ipv6": False,
             "enable_netflow": True,
             "errdisable_recovery_interval": 300,
-            "default_banner": ""
+            "default_banner": "",
         },
         "system_config": {
             "management_username": "admin",

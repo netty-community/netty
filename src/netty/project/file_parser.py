@@ -21,11 +21,11 @@ from pydantic import BaseModel
 from openpyxl import load_workbook
 from openpyxl.workbook import Workbook
 import yaml
-from ipaddress import IPv4Address 
+from ipaddress import IPv4Address
 from netty.consts import (
     DEFAULT_PROJECT_INFO_PATH,
     DEFAULT_NETWORK_TEMPLATE_PATH,
-    TemplateName
+    TemplateName,
 )
 from netty.project import Device, Connection, FixedIP, Subnet, Project
 from netty.utils.netif import match_interface_by_port_id, process_interface_name
@@ -35,7 +35,10 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 
-def read_excel_to_models(workbook: Workbook, sheet_name: str, model: type[T]) -> list[T]:
+
+def read_excel_to_models(
+    workbook: Workbook, sheet_name: str, model: type[T]
+) -> list[T]:
     """
     Reads data from a specified Excel sheet and maps it to a list of model instances.
 
@@ -54,11 +57,20 @@ def read_excel_to_models(workbook: Workbook, sheet_name: str, model: type[T]) ->
         headers = [cell.value for cell in sheet[1]]
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_data = dict(zip(headers, row))
-            model_instance = model.model_validate({key: str(value) for key, value in row_data.items() if value not in [None, ""]})
+            model_instance = model.model_validate(
+                {
+                    key: str(value)
+                    for key, value in row_data.items()
+                    if value not in [None, ""]
+                }
+            )
             model_instances.append(model_instance)
     return model_instances
 
-def parse_network_data(path: Path=Path(DEFAULT_NETWORK_TEMPLATE_PATH))->tuple[list[Device], list[Connection], list[Subnet], list[FixedIP]]:
+
+def parse_network_data(
+    path: Path = Path(DEFAULT_NETWORK_TEMPLATE_PATH),
+) -> tuple[list[Device], list[Connection], list[Subnet], list[FixedIP]]:
     wb = load_workbook(path)
     devices = read_excel_to_models(wb, TemplateName.hardware_sheet, Device)
     conns = read_excel_to_models(wb, TemplateName.connection_sheet, Connection)
@@ -67,13 +79,12 @@ def parse_network_data(path: Path=Path(DEFAULT_NETWORK_TEMPLATE_PATH))->tuple[li
     return devices, conns, subnets, fix_ips
 
 
-
 def enrich_devices_and_connections(
     devices: list[Device], conns: list[Connection]
 ) -> tuple[list[Device], list[Connection]]:
     """TODO: enrich connections when local_interface_name and remote_interface name is integer by devicetype"""
     sorted_devices = sorted(devices, key=lambda x: x.hostname)
-    management_ip_count:dict[IPv4Address, int] = defaultdict(int)
+    management_ip_count: dict[IPv4Address, int] = defaultdict(int)
     cluster: dict[IPv4Address, list[Device]] = defaultdict(list)
     for device in sorted_devices:
         if device.device_role == DeviceRole.wlan_ap:
@@ -88,15 +99,26 @@ def enrich_devices_and_connections(
         local_device = hostname_device_mapping.get(conn.local_hostname)
         remote_device = hostname_device_mapping.get(conn.remote_hostname)
         if local_device and conn.local_interface_name.isdigit():
-            local_interface = match_interface_by_port_id(local_device.device_type.interface_set, int(conn.local_interface_name))
+            local_interface = match_interface_by_port_id(
+                local_device.device_type.interface_set, int(conn.local_interface_name)
+            )
         else:
             local_interface = conn.local_interface_name
         if remote_device and conn.remote_interface_name.isdigit():
-            remote_interface = match_interface_by_port_id(remote_device.device_type.interface_set, int(conn.remote_interface_name))
+            remote_interface = match_interface_by_port_id(
+                remote_device.device_type.interface_set, int(conn.remote_interface_name)
+            )
         else:
             remote_interface = conn.remote_interface_name
-        if local_device and local_device.device_role not in (DeviceRole.firewall, DeviceRole.wlan_ap):
-            if local_device.stacked and remote_device and local_device.management_ip == remote_device.management_ip:
+        if local_device and local_device.device_role not in (
+            DeviceRole.firewall,
+            DeviceRole.wlan_ap,
+        ):
+            if (
+                local_device.stacked
+                and remote_device
+                and local_device.management_ip == remote_device.management_ip
+            ):
                 if conn.if_type == InterfaceType.base_stack_port:
                     conn.local_interface_name = local_interface
                     conn.remote_interface_name = remote_interface
@@ -104,20 +126,29 @@ def enrich_devices_and_connections(
                 else:
                     index = cluster[remote_device.management_ip].index(local_device)
                     if local_interface:
-                        local_interface = process_interface_name(local_interface, index + 1)
+                        local_interface = process_interface_name(
+                            local_interface, index + 1
+                        )
             else:
                 index = cluster[local_device.management_ip].index(local_device)
                 if local_interface:
-                    local_interface = process_interface_name(local_interface, index + 1) # type: ignore
+                    local_interface = process_interface_name(local_interface, index + 1)  # type: ignore
             conn.local_interface_name = local_interface  # type: ignore
-        if remote_device and remote_interface and remote_device.device_role not in (DeviceRole.firewall, DeviceRole.wlan_ap):
+        if (
+            remote_device
+            and remote_interface
+            and remote_device.device_role
+            not in (DeviceRole.firewall, DeviceRole.wlan_ap)
+        ):
             if remote_device.stacked and local_device:
                 index = cluster[remote_device.management_ip].index(remote_device)
                 if remote_interface:
-                    remote_interface = process_interface_name(remote_interface, index + 1) # type: ignore
+                    remote_interface = process_interface_name(
+                        remote_interface, index + 1
+                    )  # type: ignore
             conn.remote_interface_name = remote_interface
     return sorted_devices, conns
-            
+
 
 def parse_project_info(path: Path = Path(DEFAULT_PROJECT_INFO_PATH)) -> Project:
     logging.info("[parse_project_info] Parsing project info from %s", path)
@@ -126,4 +157,3 @@ def parse_project_info(path: Path = Path(DEFAULT_PROJECT_INFO_PATH)) -> Project:
         result = Project.model_validate(reader)
         logging.info(f"[parse_project_info] Done parsing project info from {path}")
         return result
-

@@ -127,9 +127,7 @@ class Link:
         return mxCell
 
     def to_link_label_xml(self) -> ET.Element:
-        style = (
-            "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=6;"
-        )
+        style = "edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=6;"
         mxCell = ET.Element(
             "mxCell",
             id=str(uuid4()),
@@ -146,6 +144,7 @@ class Link:
         mxPoint = ET.SubElement(mxGeometry, "mxPoint")
         mxPoint.set("as", "offset")
         return mxCell
+
 
 @dataclass
 class RackUnit:
@@ -164,7 +163,10 @@ class RackUnit:
             parent=self.rack_name,
         )
         mxGeometry = ET.SubElement(
-            mxCell, "mxGeometry", width="80", height="80",
+            mxCell,
+            "mxGeometry",
+            width="80",
+            height="80",
         )
         mxGeometry.set("as", "geometry")
         mxGeometry.set("x", "0")

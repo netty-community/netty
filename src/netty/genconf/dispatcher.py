@@ -48,4 +48,3 @@ def get_switch_factory(device: Device) -> type[SwitchFactory] | None:
 #     ):
 #         return FortinetFirewall
 #     return None
-

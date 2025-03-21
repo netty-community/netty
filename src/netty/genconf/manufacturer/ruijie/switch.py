@@ -17,7 +17,13 @@ from pathlib import Path
 
 from jinja2 import Template
 
-from netty.genconf.factory.switch_factory import Switch, SwitchFactory, Stp, DHCPPool, DHCPExcludeRange
+from netty.genconf.factory.switch_factory import (
+    Switch,
+    SwitchFactory,
+    Stp,
+    DHCPPool,
+    DHCPExcludeRange,
+)
 from netty.utils.mac import MacAddress
 from netty.utils.file import load_jinja2_template
 from netty.utils.ip import find_excluded_ranges

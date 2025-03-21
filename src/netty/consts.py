@@ -33,6 +33,7 @@ class TemplateName(StrEnum):
     subnet_sheet = "Subnets"
     fix_ip_sheet = "Fixed IP Addresses"
 
+
 class ProjectConfig(BaseSettings):
     corp_name: str = Field(default="the corp name of project")
     site_code: str = Field(default="the site_code of project")
@@ -58,10 +59,10 @@ class ProjectConfig(BaseSettings):
 
 PROJECT_CONFIG = ProjectConfig()
 
-DEFAULT_PROJECT_DIR = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}"
+DEFAULT_PROJECT_DIR = (
+    f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}"
+)
 DEFAULT_NETWORK_TEMPLATE_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/{TemplateName.xlsx_file}"
 DEFAULT_PROJECT_INFO_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/project.yaml"
 DEFAULT_TOPOLOGY_PATH = f"{PROJECT_DIR}/projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/topology.drawio"
 DEFAULT_CONFIG_OUTPUT_PATH = f"{PROJECT_DIR}//projects/{PROJECT_CONFIG.corp_name}/{PROJECT_CONFIG.site_code}/configuration"
-
-

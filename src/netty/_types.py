@@ -17,4 +17,6 @@ from typing import Literal
 type IfMode = Literal["access", "trunk", "routed"]
 type AAAProtocol = Literal["radius", "tacacs"]
 type FlowType = Literal["netflow", "sflow", "netstream", None]
-type FirewallWanHAMode = Literal["enhance_ha_trunk_mode", "internet_switch_ha_mode", "single_node"]
+type FirewallWanHAMode = Literal[
+    "enhance_ha_trunk_mode", "internet_switch_ha_mode", "single_node"
+]

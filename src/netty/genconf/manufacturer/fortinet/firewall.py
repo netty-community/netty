@@ -26,14 +26,6 @@ class FortinetFirewall(FirewallFactory):
     )
     default_jinja_template_name: ClassVar[str] = "firewall.j2"
 
+    def get_lan_ports(self) -> list[str]: ...
 
-    def get_lan_ports(self)->list[str]:
-        ...
-    
-    def get_ha_ports(self)->list[str]:
-        ...
-    
-        
-    
-
-    
+    def get_ha_ports(self) -> list[str]: ...
