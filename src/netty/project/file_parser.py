@@ -54,7 +54,7 @@ def read_excel_to_models(workbook: Workbook, sheet_name: str, model: type[T]) ->
         headers = [cell.value for cell in sheet[1]]
         for row in sheet.iter_rows(min_row=2, values_only=True):
             row_data = dict(zip(headers, row))
-            model_instance = model.model_validate({key: str(value) for key, value in row_data.items() if value is not in (None, "")})
+            model_instance = model.model_validate({key: str(value) for key, value in row_data.items() if value not in [None, ""]})
             model_instances.append(model_instance)
     return model_instances
 
