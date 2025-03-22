@@ -1,1 +1,91 @@
 rye
+{% extends "base.html" %}
+
+{% block title %}Netty - Network Automation Tool{% endblock %}
+
+{% block content %}
+<div class="row row-deck row-cards">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Welcome to Netty Network Automation Tool</h2>
+                <p class="text-muted">
+                    Netty is a powerful network automation tool designed to streamline the generation of network device configurations
+                    and network topology diagrams using Draw.io XML files. It supports standard network architectures and multi-vendor environments.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Features</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2">📋 Automated Configuration Generation</li>
+                    <li class="mb-2">🔗 Draw.io Topology Generation</li>
+                    <li class="mb-2">🔄 CSV File Parsing</li>
+                    <li class="mb-2">🛠️ Multi-vendor Support</li>
+                    <li class="mb-2">📊 Standard Network Architecture Support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Supported Architectures</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2">🔹 Traditional L3 Network</li>
+                    <li class="mb-2">🔹 Core Switch / Access Switch</li>
+                    <li class="mb-2">🔹 Core / Distribution / Access Switch</li>
+                    <li class="mb-2">🔹 Multi-ISP Uplink Support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">Quick Actions</h3>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <a href="/projects/new" class="btn btn-primary w-100 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-plus" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M12 5l0 14" />
+                                <path d="M5 12l14 0" />
+                            </svg>
+                            Create New Project
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/projects" class="btn btn-outline-primary w-100 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-list" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M9 6l11 0" />
+                                <path d="M9 12l11 0" />
+                                <path d="M9 18l11 0" />
+                                <path d="M5 6l0 .01" />
+                                <path d="M5 12l0 .01" />
+                                <path d="M5 18l0 .01" />
+                            </svg>
+                            View Projects
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="/tools" class="btn btn-outline-primary w-100 mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tool" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                <path d="M7 10h3v-3l-3.5 -3.5a6 6 0 0 1 8 8l6 6a2 2 0 0 1 -3 3l-6 -6a6 6 0 0 1 -8 -8l3.5 3.5" />
+                            </svg>
+                            Network Tools
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

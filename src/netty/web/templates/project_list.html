@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Netty - Network Projects{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .btn+.btn {
+        margin-left: 0.5rem;
+    }
+
+    .accordion-button {
+        display: flex;
+        align-items: center;
+        padding-right: 3rem;
+    }
+
+    .accordion-button::after {
+        position: absolute;
+        right: 1rem;
+    }
+
+    .corp-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        margin-right: 1rem;
+    }
+
+    .actions-cell {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .table> :not(caption)>*>* {
+        padding: 0.75rem 1rem;
+    }
+
+    .accordion-item {
+        border-bottom: 1px solid var(--tblr-border-color);
+    }
+
+    .accordion-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex align-items-center w-100">
+                <h3 class="card-title m-0">Network Projects</h3>
+                <a href="/projects/new" class="btn btn-primary ms-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    New Project
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if projects %}
+            <div class="accordion" id="projectAccordion">
+                {% for org, org_projects in projects.items() %}
+                <div class="accordion-item">
+                    <h4 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#org-{{ org }}">
+                            <div class="corp-info">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="icon icon-tabler icon-tabler-building"
+                                    width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M3 21l18 0" />
+                                    <path d="M9 8l1 0" />
+                                    <path d="M9 12l1 0" />
+                                    <path d="M9 16l1 0" />
+                                    <path d="M14 8l1 0" />
+                                    <path d="M14 12l1 0" />
+                                    <path d="M14 16l1 0" />
+                                    <path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" />
+                                </svg>
+                                <span>{{ org }}</span>
+                                <span class="badge bg-green">{{ org_projects|length }}</span>
+                            </div>
+                            <button class="btn btn-danger btn-sm delete-btn ms-auto"
+                                onclick="deleteProject('{{ org }}', null, event)">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M4 7l16 0" />
+                                    <path d="M10 11l0 6" />
+                                    <path d="M14 11l0 6" />
+                                    <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                    <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                </svg>
+                                Delete Group
+                            </button>
+                        </button>
+                    </h4>
+                    <div id="org-{{ org }}" class="accordion-collapse collapse">
+                        <div class="accordion-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-vcenter table-hover card-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Site Code</th>
+                                            <th>Last Modified</th>
+                                            <th class="actions-cell">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for project in org_projects %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        class="icon icon-tabler icon-tabler-map-pin text-azure"
+                                                        width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                        stroke="currentColor" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path d="M12 11m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                                                        <path
+                                                            d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z" />
+                                                    </svg>
+                                                    {{ project.site_code }}
+                                                </div>
+                                            </td>
+                                            <td class="text-muted">{{ project.last_modified }}</td>
+                                            <td class="actions-cell">
+                                                <a href="/projects/{{ org }}/{{ project.site_code }}"
+                                                    class="btn btn-primary btn-sm">View</a>
+                                                <button class="btn btn-danger btn-sm delete-btn"
+                                                    onclick="deleteProject('{{ org }}', '{{ project.site_code }}', event)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        class="icon icon-tabler icon-tabler-trash" width="24"
+                                                        height="24" viewBox="0 0 24 24" stroke-width="2"
+                                                        stroke="currentColor" fill="none" stroke-linecap="round"
+                                                        stroke-linejoin="round">
+                                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                                        <path d="M4 7l16 0" />
+                                                        <path d="M10 11l0 6" />
+                                                        <path d="M14 11l0 6" />
+                                                        <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+                                                        <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                                                    </svg>
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty">
+                <div class="empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                        stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                        <line x1="9" y1="17" x2="15" y2="17" />
+                    </svg>
+                </div>
+                <p class="empty-title">No projects found</p>
+                <p class="empty-subtitle text-muted">Start by creating a new project.</p>
+                <div class="empty-action">
+                    <a href="/projects/new" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                            stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        New Project
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function deleteProject(corpName, siteCode, event) {
+        event.stopPropagation();
+
+        let message = siteCode ?
+            `Are you sure you want to delete project ${corpName}/${siteCode}?` :
+            `Are you sure you want to delete corporation ${corpName} and ALL its projects?`;
+
+        if (!confirm(message)) {
+            return;
+        }
+
+        try {
+            const params = new URLSearchParams({ corp_name: corpName });
+            if (siteCode) {
+                params.append('site_code', siteCode);
+            }
+            const url = `/projects/project?${params.toString()}`;
+            const response = await fetch(url, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detail || 'Failed to delete project');
+            }
+
+            alert('Project deleted successfully');
+            window.location.reload();
+        } catch (error) {
+            alert(`Error: ${error.message}`);
+        }
+    }
+</script>
+{% endblock %}

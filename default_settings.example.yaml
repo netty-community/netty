@@ -1,0 +1,49 @@
+---
+baseline_config:
+    enable_ipv6: false
+    enable_netflow: true
+    errdisable_recovery_interval: 300
+    default_banner: |
+        ------------------------------------------------------------------------------------------------------
+        Welcome to login Network Device
+        This is a private property facility to be accessed by authorized users for internal systems.
+        Unauthorized access is strictly prohibited.
+        -------------------------------------------------------------------------------------------------------
+
+system_config:
+    management_vlan: 30
+    default_timezone: "Asia/Shanghai"
+    dns_server: ["8.8.8.8", "8.8.4.4"]
+    ntp_server: ["8.8.8.8", "8.8.4.4"]
+    syslog_server: "192.168.1.253"
+    syslog_udp_port: 514
+    firewall_manager: "100.100.100.100"
+    local_users:
+      - username: "admin"
+        password: "change_me_password"
+        privilege: 15
+      - username: "netops"
+        password: "change_me_password"
+        privilege: 15
+      - username: "netops-ro"
+        password: "change_me_password"
+        privilege: 1
+snmp_config:
+  snmp_community: "public"
+  snmp_port: 161
+  snmp_source: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+netflow_config:
+  flow_export_address: "10.1.0.250"
+  flow_sample_rate: 4096
+  sflow_default_port: 6343
+  netflow_default_port: 2055
+  netstream_default_port: 2055
+aaa_config:
+  aaa_protocol: "radius"
+  servers: []
+  auth_port: 1812
+  acct_port: 1813
+  username: ""
+  password: ""
+  auth_vlan: 200
+  escape_vlan: 300

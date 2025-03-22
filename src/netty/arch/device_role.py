@@ -13,6 +13,7 @@ limitations under the License.
 """
 
 from enum import StrEnum
+from dataclasses import dataclass
 
 
 from netty._types import IfMode
@@ -227,3 +228,31 @@ def generate_if_mode(local_role: DeviceRole, remote_role: DeviceRole) -> IfMode:
         else:
             return "access"
     return "access"
+
+
+@dataclass
+class DeviceRoleView:
+    name: str
+    stp_root: bool
+    stp_priority: int
+    stp_edge_optimize: bool
+    enable_guest_acl: bool
+    node_level: int
+    drawio_style: str
+
+
+def get_all_device_role_views() -> list[DeviceRoleView]:
+    results  = [
+        DeviceRoleView(
+            name=device_role.value,
+            stp_root=device_role.stp_root[0],
+            stp_priority=device_role.stp_root[1],
+            stp_edge_optimize=device_role.stp_edge_optimize,
+            enable_guest_acl=device_role.enable_guest_acl,
+            node_level=device_role.node_level,
+            drawio_style=device_role.drawio_style,
+        )
+        for device_role in DeviceRole
+    ]
+    return sorted(results, key=lambda x: x.node_level)
+

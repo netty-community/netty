@@ -12,13 +12,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from pathlib import Path
+
+import yaml
+
 from netty.utils.net import get_default_dns_server, get_default_ntp_server
-
-
 from netty.project import Subnet, Device, Connection, FixedIP
+from netty.consts import PROJECT_DIR
 
 
 def generate_default_config_yaml(region: str):
+    default_config_yaml_file = Path(PROJECT_DIR) / "default_settings.yaml"
+    if default_config_yaml_file.exists():
+        return yaml.safe_load(default_config_yaml_file.read_text())
+
     config = {
         "baseline_config": {
             "enable_ipv6": False,
@@ -27,13 +34,28 @@ def generate_default_config_yaml(region: str):
             "default_banner": "",
         },
         "system_config": {
-            "management_username": "admin",
-            "management_password": "change_me_password",
+            "local_users": [
+                {
+                    "username": "admin",
+                    "password": "change_me_password",
+                    "privilege": 15,
+                },
+                {
+                    "username": "netops",
+                    "password": "change_me_password",
+                    "privilege": 15,
+                },
+                {
+                    "username": "netops-ro",
+                    "password": "change_me_password",
+                    "privilege": 1,
+                },
+            ],
             "management_vlan": 30,
             "default_timezone": "Asia/Shanghai",
             "dns_server": [r.compressed for r in get_default_dns_server(region=region)],
             "ntp_server": [r.compressed for r in get_default_ntp_server(region=region)],
-            "syslog_server": "",
+            "syslog_server": "192.168.1.253",
             "syslog_udp_port": 514,
             "firewall_manager": "100.100.100.100",
         },
@@ -117,3 +139,4 @@ def generate_project_yaml() -> dict:
     }
 
     return project
+

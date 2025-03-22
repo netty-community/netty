@@ -13,6 +13,7 @@ limitations under the License.
 """
 
 from enum import StrEnum
+from dataclasses import dataclass
 
 
 class Platform(StrEnum):
@@ -79,3 +80,16 @@ class PortChannelPrefix(StrEnum):
     aruba = "Po"
     fortinet = ""
     paloalto = "AE"
+
+@dataclass
+class PlatformView:
+    name: str
+    manufacturer: Manufacturer
+    port_channel_prefix: PortChannelPrefix
+
+
+def get_platform_views() -> list[PlatformView]:
+    return [
+        PlatformView(name=platform.value, manufacturer=platform.manufacturer, port_channel_prefix=platform.port_channel_prefix)
+        for platform in Platform
+    ]

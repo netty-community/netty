@@ -85,11 +85,8 @@ class BaselineConfig(BaseModel):
 
 
 class SystemConfig(BaseModel):
-    management_username: str = Field(
-        ..., description="The username of the local management user"
-    )
-    management_password: str = Field(
-        ..., description="The password of the local management user"
+    local_users: list["AAAUser"] = Field(
+        default_factory=list, description="The local users of the device"
     )
     management_vlan: int = Field(
         default=30, description="The vlan of the local management vlan"
@@ -139,6 +136,15 @@ class NetflowConfig(BaseModel):
     )
     netstream_default_port: int = Field(
         default=2055, description="The default port of the netstream"
+    )
+
+
+class AAAUser(BaseModel):
+    username: str = Field(..., description="The username of the local user")
+    password: str = Field(..., description="The password of the local user")
+    privilege: int = Field(
+        default=15,
+        description="The privilege of the user, default is 15 for full access",
     )
 
 

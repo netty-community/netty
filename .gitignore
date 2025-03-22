@@ -13,3 +13,4 @@ wheels/
 projects/
 project.config.yaml
 .coverage
+default_settings.yaml

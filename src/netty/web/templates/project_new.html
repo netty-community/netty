@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Netty - New Project{% endblock %}
+
+{% block content %}
+<div class="row row-deck row-cards justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <form class="card" method="post" action="/projects/new">
+            <div class="card-header">
+                <h3 class="card-title">Create New Project</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label required">Organization Name</label>
+                    <input type="text" class="form-control" name="corp_name" required placeholder="e.g. ACME">
+                    <small class="form-hint">Organization name will be used as the top-level directory</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required">Site Code</label>
+                    <input type="text" class="form-control" name="site_code" required placeholder="e.g. CNPEK01">
+                    <small class="form-hint">Site code will be used as the project directory name</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label required">Country Code</label>
+                    <input type="text" class="form-control" name="country_code" required placeholder="e.g. CN"
+                        maxlength="2">
+                    <small class="form-hint">Two-letter country code (e.g. SG, US, CN, it will generate default public ntp/dns server based on country)</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-check">
+                        <input type="checkbox" class="form-check-input" name="replace_project_config" value="true"
+                            checked>
+                        <span class="form-check-label">Update project configuration file</span>
+                    </label>
+                    <small class="form-hint">If checked, will update the global project.config.yaml file</small>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="/projects" class="btn btn-link">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

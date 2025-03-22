@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Netty - Network Projects{% endblock %}
+
+{% block content %}
+<div class="row row-deck row-cards">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">Network Projects</h3>
+                    <a href="/projects/new" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-plus" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M12 5l0 14" />
+                            <path d="M5 12l14 0" />
+                        </svg>
+                        New Project
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                        <thead>
+                            <tr>
+                                <th>Project Name</th>
+                                <th>Architecture</th>
+                                <th>Devices</th>
+                                <th>Status</th>
+                                <th class="w-1">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in projects %}
+                            <tr>
+                                <td>{{ project.name }}</td>
+                                <td class="text-muted">{{ project.architecture }}</td>
+                                <td>{{ project.device_count }} devices</td>
+                                <td>
+                                    <span class="badge bg-{{ project.status_color }}">{{ project.status }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-list flex-nowrap">
+                                        <a href="{{ project.url }}" class="btn btn-sm">
+                                            View
+                                        </a>
+                                        <a href="{{ project.url }}/topology" class="btn btn-sm">
+                                            Topology
+                                        </a>
+                                        <a href="{{ project.url }}/config" class="btn btn-sm">
+                                            Config
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

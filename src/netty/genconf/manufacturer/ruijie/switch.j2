@@ -160,8 +160,11 @@ ntp server {{switch.system_config.ntp_server[1]}} source VLAN {{switch.system_co
 aaa new-model
 aaa authorization exec default local
 aaa authentication login default local
-username {{switch.system_config.management_username}} privilege 15 password {{switch.system_config.management_password}}
-
+{%if switch.system_config.local_users-%}
+{% for user in switch.system_config.local_users%}
+    username {{user.username}} privilege {{user.privilege}} password {{user.password}}
+{% endfor %}
+{% endif %}
 
 {%if switch.snmp_config.snmp_source_address-%}
 ip access-list standard snmp-acl

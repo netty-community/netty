@@ -83,14 +83,18 @@ ntp-service unicast-server {{switch.system_config.ntp_server[0]}}
 ntp server unicast-server {{switch.system_config.ntp_server[1]}}
 
 aaa
-    local-user {{switch.system_config.management_username}} password irreversible-cipher {{switch.system_config.management_password}}
-    local-user {{switch.system_config.management_username}} service-type terminal ssh
-    local-user {{switch.system_config.management_username}} privilege level 15
+{%if switch.system_config.local_users-%}
+{% for user in switch.system_config.local_users%}
+    local-user {{user.username}} password irreversible-cipher {{user.password}}
+    local-user {{user.username}} service-type terminal ssh
+    local-user {{user.username}} privilege level {{user.privilege}}
     undo local-aaa-user password policy administrator
-username {{switch.system_config.management_username}} privilege 15 password {{switch.system_config.management_password}}
-ssh user {{switch.system_config.management_username}}
-ssh user {{switch.system_config.management_username}} authentication-type password
-ssh user {{switch.system_config.management_username}} service-type stelnet
+username {{user.username}} privilege {{user.privilege}} password {{user.password}}
+ssh user {{user.username}}
+ssh user {{user.username}} authentication-type password
+ssh user {{user.username}} service-type stelnet
+{% endfor %}
+{% endif %}
 
 {% if switch.aaa_config and switch.aaa_config.servers -%}
     {%if switch.aaa_config.aaa_protocol == "radius"%}

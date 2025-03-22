@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Netty - Architecture{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+                <li class="nav-item">
+                    <a href="#roles" class="nav-link active" data-bs-toggle="tab">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+                            <path d="M12 3v18" />
+                        </svg>
+                        Device Roles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#platforms" class="nav-link" data-bs-toggle="tab">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 21h18" />
+                            <path d="M19 21v-4" />
+                            <path d="M19 17a2 2 0 0 0 2 -2v-2a2 2 0 0 0 -2 -2h-2" />
+                            <path d="M13 17v-2" />
+                            <path d="M11 17v-4a2 2 0 0 1 2 -2h2" />
+                            <path d="M5 21v-16" />
+                        </svg>
+                        Platforms
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane active show" id="roles">
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr>
+                                    <th>Role Name</th>
+                                    <th>STP Priority</th>
+                                    <th>Node Level</th>
+                                    <th>Features</th>
+                                    <th>Style</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for role in device_roles %}
+                                <tr>
+                                    <td>{{ role.name }}</td>
+                                    <td>{{ role.stp_priority }}</td>
+                                    <td>{{ role.node_level }}</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            {% if role.stp_root %}
+                                            <span class="badge bg-blue">STP Root</span>
+                                            {% endif %}
+                                            {% if role.stp_edge_optimize %}
+                                            <span class="badge bg-green">Edge Optimize</span>
+                                            {% endif %}
+                                            {% if role.enable_guest_acl %}
+                                            <span class="badge bg-yellow">Guest ACL</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge">Style</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane" id="platforms">
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr>
+                                    <th>Platform Name</th>
+                                    <th>Manufacturer</th>
+                                    <th>Port-Channel Prefix</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for platform in platforms %}
+                                <tr>
+                                    <td>{{ platform.name }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="avatar avatar-xs">{{ platform.manufacturer.value[0] }}</span>
+                                            {{ platform.manufacturer.value }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if platform.port_channel_prefix %}
+                                        <code>{{ platform.port_channel_prefix }}</code>
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
